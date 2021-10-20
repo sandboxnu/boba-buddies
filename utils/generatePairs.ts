@@ -7,6 +7,10 @@ const generatePairs = async (app: App) => {
     const membersResponse = await app.client.conversations.members({channel: TESTING_CHANNEL_ID})
     const memberIDs = membersResponse.members?.filter(userID => userID !== BOT_USER_ID)
     // TODO: pair users and return list of pairs
+
+    const pairs: string[][] = [];
+    
+    return pairs;
 }
 
 export default generatePairs;
