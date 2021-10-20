@@ -16,7 +16,7 @@ const generatePairs = async (app: App) => {
 
     // only works if we're doing pairs
     // if someone is lonely, then group that person with an existing pair
-    if (pairs.length * 2 !== memberIDs.length) {
+    if (pairs.length > 1 && pairs.length * 2 !== memberIDs.length) {
         const lonelyMember: string[] = pairs.pop() ?? [];
         const lastPair: string[] = pairs.pop() ?? [];
         const newPair = lastPair.concat(lonelyMember);

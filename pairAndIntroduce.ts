@@ -10,3 +10,4 @@ const app = new App({
 });
 
 const pairs = generatePairs(app);
+
