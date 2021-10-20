@@ -49,6 +49,7 @@ describe('testing the util function for generating pairs', () =>{
 
     // this would never happen hopefully
     it('should pair a list with 1 member', async () => {
+        // sorry jerry, not even the slack bot wants to talk to you
         const jerryList: string[] = ["jerry"];
         const mockConversations: any = {
             members: jest.fn().mockReturnValue({ members: jerryList })
