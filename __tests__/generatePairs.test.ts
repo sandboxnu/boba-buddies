@@ -18,7 +18,9 @@ describe('testing the util function for generating pairs', () =>{
 
         const actualList: string[][] = await generatePairs(mockApp);
 
-        expect(actualList).toStrictEqual([["rick", "morty"], ["summer", "beth"]]);
+        expect(actualList).toHaveLength(2);
+        expect(actualList[0]).toHaveLength(2);
+        expect(actualList[1]).toHaveLength(2);
         expect(mockConversations.members).toHaveBeenCalled();
     })
     it('should pair an odd numbered list', async () => {
@@ -31,7 +33,9 @@ describe('testing the util function for generating pairs', () =>{
 
         const actualList: string[][] = await generatePairs(mockApp);
 
-        expect(actualList).toStrictEqual([["rick", "morty"], ["summer", "beth", "jerry"]]);
+        expect(actualList).toHaveLength(2);
+        expect(actualList[0]).toHaveLength(2);
+        expect(actualList[1]).toHaveLength(3);
         expect(mockConversations.members).toHaveBeenCalled();
     })
     it('should pair an empty list', async () => {
@@ -48,7 +52,7 @@ describe('testing the util function for generating pairs', () =>{
     })
 
     // this would never happen hopefully
-    it('should pair a list with 1 member', async () => {
+    it('should not pair a list with 1 member', async () => {
         // sorry jerry, not even the slack bot wants to talk to you
         const jerryList: string[] = ["jerry"];
         const mockConversations: any = {

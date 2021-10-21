@@ -6,7 +6,7 @@ const BOT_USER_ID = "U02J904RH1S";
 
 const generatePairs = async (app: App) => {
     const membersResponse = await app.client.conversations.members({channel: TESTING_CHANNEL_ID})
-    const memberIDs = membersResponse.members?.filter(userID => userID !== BOT_USER_ID) as string[]
+    const memberIDs = shuffle(membersResponse.members?.filter(userID => userID !== BOT_USER_ID) as string[])
     const pairs: string[][] = [];
 
     // we shouldn't start any multiuser channels with just a singular person lol
@@ -30,6 +30,25 @@ const generatePairs = async (app: App) => {
     }
 
     return pairs;
+}
+
+// stackoverflow said fisher-yates good shuffle algorithm, so i copy pasta away
+function shuffle(array: string[]): string[] {
+  var m = array.length, t, i;
+
+  // While there remain elements to shuffle…
+  while (m) {
+
+    // Pick a remaining element…
+    i = Math.floor(Math.random() * m--);
+
+    // And swap it with the current element.
+    t = array[m];
+    array[m] = array[i];
+    array[i] = t;
+  }
+
+  return array;
 }
 
 export default generatePairs;
