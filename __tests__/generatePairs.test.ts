@@ -21,6 +21,12 @@ describe('testing the util function for generating pairs', () =>{
         expect(actualList).toHaveLength(2);
         expect(actualList[0]).toHaveLength(2);
         expect(actualList[1]).toHaveLength(2);
+
+        // ensure all names are present
+        evenList.forEach((s) => {
+            expect(actualList[0].includes(s) || actualList[1].includes(s)).toBeTruthy();
+        });
+
         expect(mockConversations.members).toHaveBeenCalled();
     })
     it('should pair an odd numbered list', async () => {
@@ -36,6 +42,11 @@ describe('testing the util function for generating pairs', () =>{
         expect(actualList).toHaveLength(2);
         expect(actualList[0]).toHaveLength(2);
         expect(actualList[1]).toHaveLength(3);
+
+        // ensure all names are present
+        oddList.forEach((s) => {
+            expect(actualList[0].includes(s) || actualList[1].includes(s)).toBeTruthy();
+        });
         expect(mockConversations.members).toHaveBeenCalled();
     })
     it('should pair an empty list', async () => {
