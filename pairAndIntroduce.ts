@@ -1,11 +1,20 @@
 import { App } from '@slack/bolt';
+import { ConversationsOpenResponse } from '@slack/web-api';
 import generatePairs from './utils/generatePairs';
+require('dotenv').config();
 
-// maybe want mapping/container of intro messages/icebreakers to 
-// send so it can be randomized? is this even supposed be here...
-// for now test constants :DDDD
-const TESTING_INTRO_MSG = "Say hi to your boba buddy!"
-const TESTING_ICEBREAKER = "What's your favorite boba flavor?"
+const INTRO_MSG = "Say hi to your boba buddy!"
+const ICEBREAKER_1 = "What's your hot take?"
+const ICEBREAKER_2 = "What's your favorite fruit?"
+const ICEBREAKER_3 = "Last song you listened to?"
+const ICEBREAKER_4 = "Best/worst professor at NEU?"
+const ICEBREAKER_5 = "Favorite pizza topping?"
+const ICEBREAKER_6 = "Favorite drink?"
+const ICEBREAKER_7 = "If all of Sandbox was on a deserted island, who would be the last to survive?"
+const ICEBREAKER_8 = "What's your enneagram/MBTI?"
+const ICEBREAKER_9 = "If you were a potato, how would you like to be cooked?"
+const ICEBREAKER_10 = "What hobbies do you have (outside of Sandbox)?"
+const ICEBREAKERS = [ICEBREAKER_1, ICEBREAKER_2, ICEBREAKER_3, ICEBREAKER_4, ICEBREAKER_5, ICEBREAKER_6, ICEBREAKER_7, ICEBREAKER_8, ICEBREAKER_9, ICEBREAKER_10]
 
 // Initializes your app with your bot token and signing secret
 const app = new App({
@@ -17,14 +26,10 @@ const app = new App({
 
 const promisedPairs = generatePairs(app);
 
-// i have no clue if im supposed to make a separate file for this or where to
-// call it from but yayyyy
 const startConversations = async (app: App) => {
   const pairs = await promisedPairs;
+
   // iterate through all pairs to open a DM and send an intro message
-  // is it necessary to add the slackbot as a user in the convo?? i think not but maybe.
-  // do all of this here??? or separate the logic for opening dms and sending first intro msgs
-  // ?????????????????????
   pairs.forEach(async pair => {
     var thirdUser = "";
     // account for potential group of 3
@@ -32,22 +37,23 @@ const startConversations = async (app: App) => {
       thirdUser = "," + pair[2];
     }
     // generate users string
-    const users = pair[0] + "," + pair[1] + thirdUser;
+    const users: string = `${pair[0]},${pair[1]}${thirdUser}`;
    
     // open DM between users
-    const conversationResponse = await app.client.conversations.open(users);
+    const conversationResponse: ConversationsOpenResponse = await app.client.conversations.open({users: users});
 
     if (!conversationResponse.ok) {
-      // do some error handling stuff
+      console.log(`Conversation could not be opened. Error: ${conversationResponse.error}`);
     }
     // get dm conversation id from the response
-    const conversationId: string = conversationResponse.channel.id;
-
-    // post messages to above convo id 
-    // blocks for prettier/more interactive messages? text for now hehe
-    const introMessageResponse = await app.client.chat.postMessage(conversationId, {text: TESTING_INTRO_MSG});
-    const icebreakerResponse = await app.client.chat.postMessage(conversationId, {text: TESTING_ICEBREAKER});
-
-    // mroe error handling
+    if (conversationResponse.channel) {
+      const conversationId: string = conversationResponse.channel.id as string;
+      // post messages to above convo id 
+      const introMessageResponse = await app.client.chat.postMessage({channel: conversationId, text: INTRO_MSG});
+      const icebreaker = ICEBREAKERS[Math.floor(Math.random() * ICEBREAKERS.length)];
+      const icebreakerResponse = await app.client.chat.postMessage({channel: conversationId, text: icebreaker});
+    }    
   });
 }
+
+startConversations(app);
