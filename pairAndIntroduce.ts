@@ -1,5 +1,5 @@
 import { App } from '@slack/bolt';
-import { ConversationsOpenResponse } from '@slack/web-api';
+import { ChatPostMessageResponse, ConversationsOpenResponse } from '@slack/web-api';
 import generatePairs from './utils/generatePairs';
 require('dotenv').config();
 
@@ -24,11 +24,9 @@ const app = new App({
   appToken: process.env.SLACK_APP_TOKEN // add this
 });
 
-const promisedPairs = generatePairs(app);
-
-const startConversations = async (app: App) => {
-  const pairs = await promisedPairs;
-
+export const startConversations = async (app: App) => {
+  const pairs = await generatePairs(app);
+  console.log(pairs);
   // iterate through all pairs to open a DM and send an intro message
   pairs.forEach(async pair => {
     var thirdUser = "";
@@ -41,19 +39,18 @@ const startConversations = async (app: App) => {
    
     // open DM between users
     const conversationResponse: ConversationsOpenResponse = await app.client.conversations.open({users: users});
-
     if (!conversationResponse.ok) {
       console.log(`Conversation could not be opened. Error: ${conversationResponse.error}`);
     }
-    // get dm conversation id from the response
+
+    console.log(conversationResponse.channel)
+    // get DM conversation id from the response
     if (conversationResponse.channel) {
       const conversationId: string = conversationResponse.channel.id as string;
-      // post messages to above convo id 
-      const introMessageResponse = await app.client.chat.postMessage({channel: conversationId, text: INTRO_MSG});
+      // post messages to convo id 
+      const introMessageResponse: ChatPostMessageResponse = await app.client.chat.postMessage({channel: conversationId, text: INTRO_MSG});
       const icebreaker = ICEBREAKERS[Math.floor(Math.random() * ICEBREAKERS.length)];
-      const icebreakerResponse = await app.client.chat.postMessage({channel: conversationId, text: icebreaker});
+      const icebreakerResponse: ChatPostMessageResponse = await app.client.chat.postMessage({channel: conversationId, text: icebreaker});
     }    
   });
 }
-
-startConversations(app);
