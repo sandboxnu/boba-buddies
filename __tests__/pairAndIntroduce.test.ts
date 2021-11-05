@@ -1,4 +1,4 @@
-import { startConversations } from "../pairAndIntroduce";
+import { startConversations } from "../utils/startConversations"
 
 describe('testing the startConversations function', () =>{
     const mockApp: any = {
