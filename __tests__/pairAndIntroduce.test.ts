@@ -11,58 +11,58 @@ describe('testing the startConversations function', () =>{
             }
         }
     };
-it('should not pair for an empty list', async() => {
-    const emptyList: string[] = [];
-    const mockConversations: any = {
-        members: jest.fn().mockReturnValue({ members: emptyList }),
-        open: jest.fn()
-    };
-    mockApp.client.conversations = mockConversations;
 
-    await startConversations(mockApp);
+    it('should not pair for an empty list', async() => {
+        const emptyList: string[] = [];
+        const mockConversations: any = {
+            members: jest.fn().mockReturnValue({ members: emptyList }),
+            open: jest.fn()
+        };
+        mockApp.client.conversations = mockConversations;
 
-    expect(mockConversations.members).toHaveBeenCalled();
-    expect(mockConversations.open).toHaveBeenCalledTimes(0);
-})
+        await startConversations(mockApp);
 
-it('should open a DM between all pairs and send an intro msg/icebreaker for an even number of people', async() => {
-    const evenList: string[] = ["ryan", "vera", "sophie", "jia"];
-    const mockConversations: any = {
-        members: jest.fn().mockReturnValue({ members: evenList }),
-        open: jest.fn().mockReturnValue({ok: true, channel: {id: "hahaha"}})
-    };
-    const mockChat: any = {
-        postMessage: jest.fn()
-    };  
+        expect(mockConversations.members).toHaveBeenCalled();
+        expect(mockConversations.open).toHaveBeenCalledTimes(0);
+    })
 
-    mockApp.client.conversations = mockConversations;
-    mockApp.client.chat = mockChat;
+    it('should open a DM between all pairs and send an intro msg/icebreaker for an even number of people', async() => {
+        const evenList: string[] = ["ryan", "vera", "sophie", "jia"];
+        const mockConversations: any = {
+            members: jest.fn().mockReturnValue({ members: evenList }),
+            open: jest.fn().mockReturnValue({ok: true, channel: {id: "hahaha"}})
+        };
+        const mockChat: any = {
+            postMessage: jest.fn()
+        };
 
-    await startConversations(mockApp);
+        mockApp.client.conversations = mockConversations;
+        mockApp.client.chat = mockChat;
 
-    expect(mockConversations.members).toHaveBeenCalled();
-    expect(mockConversations.open).toHaveBeenCalledTimes(2);
-    expect(mockChat.postMessage).toHaveBeenCalledTimes(4);
-})
+        await startConversations(mockApp);
 
-it('should open a DM between all pairs and send an intro msg/icebreaker for an odd number of people', async() => {
-    const oddList: string[] = ["ryan", "vera", "sophie", "jia", "rick"];
-    const mockConversations: any = {
-        members: jest.fn().mockReturnValue({ members: oddList }),
-        open: jest.fn().mockReturnValue({ok: true, channel: {id: "hahaha"}})
-    };
-    const mockChat: any = {
-        postMessage: jest.fn()
-    };  
+        expect(mockConversations.members).toHaveBeenCalled();
+        expect(mockConversations.open).toHaveBeenCalledTimes(2);
+        expect(mockChat.postMessage).toHaveBeenCalledTimes(4);
+    })
 
-    mockApp.client.conversations = mockConversations;
-    mockApp.client.chat = mockChat;
+    it('should open a DM between all pairs and send an intro msg/icebreaker for an odd number of people', async() => {
+        const oddList: string[] = ["ryan", "vera", "sophie", "jia", "rick"];
+        const mockConversations: any = {
+            members: jest.fn().mockReturnValue({ members: oddList }),
+            open: jest.fn().mockReturnValue({ok: true, channel: {id: "hahaha"}})
+        };
+        const mockChat: any = {
+            postMessage: jest.fn()
+        };
 
-    await startConversations(mockApp);
+        mockApp.client.conversations = mockConversations;
+        mockApp.client.chat = mockChat;
 
-    expect(mockConversations.members).toHaveBeenCalled();
-    expect(mockConversations.open).toHaveBeenCalledTimes(2);
-    expect(mockChat.postMessage).toHaveBeenCalledTimes(4);
-})
+        await startConversations(mockApp);
 
+        expect(mockConversations.members).toHaveBeenCalled();
+        expect(mockConversations.open).toHaveBeenCalledTimes(2);
+        expect(mockChat.postMessage).toHaveBeenCalledTimes(4);
+    })
 });

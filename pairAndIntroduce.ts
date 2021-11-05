@@ -26,31 +26,29 @@ const app = new App({
 
 export const startConversations = async (app: App) => {
   const pairs = await generatePairs(app);
-  console.log(pairs);
   // iterate through all pairs to open a DM and send an intro message
-  pairs.forEach(async pair => {
-    var thirdUser = "";
+  for (const pair of pairs) {
+    let thirdUser = "";
     // account for potential group of 3
     if (pair.length > 2) {
       thirdUser = "," + pair[2];
     }
     // generate users string
     const users: string = `${pair[0]},${pair[1]}${thirdUser}`;
-   
+
     // open DM between users
     const conversationResponse: ConversationsOpenResponse = await app.client.conversations.open({users: users});
     if (!conversationResponse.ok) {
       console.log(`Conversation could not be opened. Error: ${conversationResponse.error}`);
     }
 
-    console.log(conversationResponse.channel)
     // get DM conversation id from the response
     if (conversationResponse.channel) {
       const conversationId: string = conversationResponse.channel.id as string;
-      // post messages to convo id 
+      // post messages to convo id
       const introMessageResponse: ChatPostMessageResponse = await app.client.chat.postMessage({channel: conversationId, text: INTRO_MSG});
       const icebreaker = ICEBREAKERS[Math.floor(Math.random() * ICEBREAKERS.length)];
       const icebreakerResponse: ChatPostMessageResponse = await app.client.chat.postMessage({channel: conversationId, text: icebreaker});
-    }    
-  });
+    }
+  }
 }
