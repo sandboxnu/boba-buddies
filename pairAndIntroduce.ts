@@ -49,6 +49,13 @@ export const startConversations = async (app: App) => {
       const introMessageResponse: ChatPostMessageResponse = await app.client.chat.postMessage({channel: conversationId, text: INTRO_MSG});
       const icebreaker = ICEBREAKERS[Math.floor(Math.random() * ICEBREAKERS.length)];
       const icebreakerResponse: ChatPostMessageResponse = await app.client.chat.postMessage({channel: conversationId, text: icebreaker});
+
+      if (!introMessageResponse.ok) {
+        console.log(`Intro message could not be sent. Error: ${introMessageResponse.error}`);
+      }
+      if (!icebreakerResponse.ok) {
+        console.log(`Icebreaker could not be sent. Error: ${icebreakerResponse.error}`);
+      }
     }
   }
 }
