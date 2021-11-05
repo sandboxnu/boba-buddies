@@ -28,13 +28,8 @@ export const startConversations = async (app: App) => {
   const pairs = await generatePairs(app);
   // iterate through all pairs to open a DM and send an intro message
   for (const pair of pairs) {
-    let thirdUser = "";
-    // account for potential group of 3
-    if (pair.length > 2) {
-      thirdUser = "," + pair[2];
-    }
     // generate users string
-    const users: string = `${pair[0]},${pair[1]}${thirdUser}`;
+    const users: string = pair.join(",");
 
     // open DM between users
     const conversationResponse: ConversationsOpenResponse = await app.client.conversations.open({users: users});

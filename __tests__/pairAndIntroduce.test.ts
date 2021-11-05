@@ -33,7 +33,7 @@ describe('testing the startConversations function', () =>{
             open: jest.fn().mockReturnValue({ok: true, channel: {id: "hahaha"}})
         };
         const mockChat: any = {
-            postMessage: jest.fn()
+            postMessage: jest.fn().mockReturnValue({ok: true, channel: {id: "hahaha"}})
         };
 
         mockApp.client.conversations = mockConversations;
@@ -53,7 +53,7 @@ describe('testing the startConversations function', () =>{
             open: jest.fn().mockReturnValue({ok: true, channel: {id: "hahaha"}})
         };
         const mockChat: any = {
-            postMessage: jest.fn()
+            postMessage: jest.fn().mockReturnValue({ok: true, channel: {id: "hahaha"}})
         };
 
         mockApp.client.conversations = mockConversations;
