@@ -6,7 +6,7 @@ const BOT_USER_ID = "U02J904RH1S";
 
 const generatePairs = async (app: App) => {
     const membersResponse = await app.client.conversations.members({channel: TESTING_CHANNEL_ID})
-    const memberIDs = shuffle(membersResponse.members?.filter(userID => userID !== BOT_USER_ID) as string[])
+    const memberIDs = shuffle(membersResponse.members?.filter((userID: string) => userID !== BOT_USER_ID) as string[])
     const pairs: string[][] = [];
 
     // we shouldn't start any multiuser channels with just a singular person lol
@@ -20,7 +20,6 @@ const generatePairs = async (app: App) => {
         pairs.push(chunk);
     }
 
-    // only works if we're doing pairs
     // if someone is lonely, then group that person with an existing pair
     if (pairs.length > 1 && pairs.length * 2 !== memberIDs.length) {
         const lonelyMember: string[] = pairs.pop() ?? [];

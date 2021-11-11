@@ -1,5 +1,6 @@
 import { App } from '@slack/bolt';
-import generatePairs from './utils/generatePairs';
+
+require('dotenv').config();
 
 // Initializes your app with your bot token and signing secret
 const app = new App({
@@ -8,6 +9,3 @@ const app = new App({
   socketMode: true, // add this
   appToken: process.env.SLACK_APP_TOKEN // add this
 });
-
-const pairs = generatePairs(app);
-
