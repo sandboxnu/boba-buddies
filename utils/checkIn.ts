@@ -5,6 +5,12 @@ import { BOT_USER_ID } from "./generatePairs";
 
 require('dotenv').config();
 
+/**
+ * Checks the conversation history for each pairing to determine if introductions were 
+ * made. If no non-bot messages were sent, randomly ping channel user prompting them to send a 
+ * message.
+ * @param app 
+ */
 export const checkIn = async (app: App) => {
     // TODO: set this env variable before deploy
     const pairingsPath = <string>process.env.PAIRINGS_PATH;
