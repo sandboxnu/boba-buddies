@@ -2,7 +2,7 @@ import { App } from "@slack/bolt";
 
 //TODO: change this to actual channel id when deploying
 const TESTING_CHANNEL_ID = "C02J6R0SUSX";
-const BOT_USER_ID = "U02J904RH1S";
+export const BOT_USER_ID = "U02J904RH1S";
 
 const generatePairs = async (app: App) => {
     const membersResponse = await app.client.conversations.members({channel: TESTING_CHANNEL_ID})
