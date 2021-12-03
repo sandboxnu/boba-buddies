@@ -1,6 +1,7 @@
 import { App } from "@slack/bolt";
 import { ChatPostMessageResponse, ConversationsOpenResponse } from '@slack/web-api';
 import generatePairs from "./generatePairs";
+import fs from 'fs';
 
 const INTRO_MSG = "Say hi to your boba buddy!"
 const ICEBREAKER_1 = "What's your hot take?"
@@ -16,7 +17,10 @@ const ICEBREAKER_10 = "What hobbies do you have (outside of Sandbox)?"
 const ICEBREAKERS = [ICEBREAKER_1, ICEBREAKER_2, ICEBREAKER_3, ICEBREAKER_4, ICEBREAKER_5, ICEBREAKER_6, ICEBREAKER_7, ICEBREAKER_8, ICEBREAKER_9, ICEBREAKER_10]
 
 export const startConversations = async (app: App) => {
+
     const pairs = await generatePairs(app);
+    const channelAndPairs = new Map<string, string[]>();
+
     // iterate through all pairs to open a DM and send an intro message
     for (const pair of pairs) {
       // generate users string
@@ -42,6 +46,11 @@ export const startConversations = async (app: App) => {
         if (!icebreakerResponse.ok) {
           console.log(`Icebreaker could not be sent. Error: ${icebreakerResponse.error}`);
         }
+
+        channelAndPairs.set(conversationId, pair);
       }
+      
     }
+    var storedPairs = JSON.stringify(Array.from(channelAndPairs.entries()));
+    fs.writeFileSync('./utils/pairings.json', storedPairs);
   }
