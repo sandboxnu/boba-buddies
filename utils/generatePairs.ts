@@ -1,10 +1,11 @@
 import { App } from "@slack/bolt";
+import lastPairings from './lastPairing.json';
 
 //TODO: change this to actual channel id when deploying
 const TESTING_CHANNEL_ID = "C02J6R0SUSX";
 export const BOT_USER_ID = "U02J904RH1S";
 
-const generatePairs = async (app: App) => {
+export const generatePairs = async (app: App) => {
     const membersResponse = await app.client.conversations.members({channel: TESTING_CHANNEL_ID})
     const memberIDs = shuffle(membersResponse.members?.filter((userID: string) => userID !== BOT_USER_ID) as string[])
     const pairs: string[][] = [];
@@ -33,7 +34,7 @@ const generatePairs = async (app: App) => {
 
 // stackoverflow said fisher-yates good shuffle algorithm, so i copy pasta away
 function shuffle(array: string[]): string[] {
-  var m = array.length, t, i;
+  let m = array.length, t, i;
 
   // While there remain elements to shuffle…
   while (m) {
@@ -50,4 +51,25 @@ function shuffle(array: string[]): string[] {
   return array;
 }
 
-export default generatePairs;
+export const shiftByOne = (): string[][]  => {
+  const firstPersonList = lastPairings.map((pairs) => pairs[0])
+
+  const firstElem = firstPersonList.shift()
+  if (firstElem) {
+    firstPersonList.push(firstElem)
+  }
+
+  const modifiedPairings = lastPairings.map((pairs, ind) => [firstPersonList[ind], pairs[1]])
+
+  let json = JSON.stringify(modifiedPairings);
+  let fs = require('fs');
+  fs.writeFile('lastPairing.json', json, (err: Error) => {
+    console.log('get fucked', err)
+  });
+
+  return modifiedPairings;
+}
+
+module.exports = {
+  shiftByOne, generatePairs
+}

@@ -1,4 +1,4 @@
-import generatePairs from "../utils/generatePairs";
+import {shiftByOne, generatePairs} from "../utils/generatePairs";
 
 describe('testing the util function for generating pairs', () =>{
     const mockApp: any = {
@@ -75,5 +75,11 @@ describe('testing the util function for generating pairs', () =>{
 
         expect(actualList).toStrictEqual([]);
         expect(mockConversations.members).toHaveBeenCalled();
+    })
+
+    it('should shift member by one', async () => {
+        const actualList = shiftByOne();
+
+        expect(actualList).toStrictEqual([['c', 'b'], ['e', 'd'], ['a', 'f']])
     })
 })
