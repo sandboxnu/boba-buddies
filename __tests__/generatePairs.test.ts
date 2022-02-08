@@ -8,6 +8,13 @@ describe('testing the util function for generating pairs', () =>{
             }
         }
     };
+    beforeEach(() => {
+        jest.spyOn(global.Math, 'random').mockReturnValue(0.5);
+    });
+
+    afterEach(() => {
+        jest.spyOn(global.Math, 'random').mockRestore();
+    })
 
     it('should pair an even numbered list', async () => {
         const evenList: string[] = ["rick", "morty", "summer", "beth"];
@@ -81,11 +88,11 @@ describe('testing the util function for generating pairs', () =>{
         jest.mock('../utils/data/lastPairings.json', ()=>([
               ["a", "b"],
               ["c", "d"],
-              ["e", "f"]
+              ["e", "f", "g"]
           ]
         ))
         const actualList = await shiftByOne();
 
-        expect(actualList).toStrictEqual([['c', 'b'], ['e', 'd'], ['a', 'f']])
+        expect(actualList).toStrictEqual([['c', 'b'], ['g', 'd', 'e'], ['a', 'f']])
     })
 })
