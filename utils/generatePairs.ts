@@ -55,16 +55,28 @@ export const shiftByOne = async (): Promise<string[][]>  => {
   let lastPairings = require('./data/lastPairings.json');
 
   // get first person in each pairing
-  const firstPersonList = lastPairings.map((pairs: string[]) => pairs[0])
+  const firstPersonList = lastPairings.map((pair: string[]) => pair[0])
+
+  // get odd group
+  const oddGroup = lastPairings.filter((pair: string[]) => pair.length === 3)[0]
 
   // put first person at end of list (shifting everyone up one)
   const firstElem = firstPersonList.shift()
-  if (firstElem) {
-    firstPersonList.push(firstElem)
-  }
+  firstPersonList.push(firstElem)
 
   // update pairings with new first person
   lastPairings = lastPairings.map((pairs: string[], ind: number) => [firstPersonList[ind], pairs[1]])
+
+  // get last person
+  let oddPersonOut: string;
+  if (oddGroup) {
+    oddPersonOut = oddGroup[2];
+    const oddPersonIndex = Math.floor(Math.random() * lastPairings.length);
+    const newOddPairing = lastPairings[oddPersonIndex];
+    newOddPairing.push(oddPersonOut);
+    [newOddPairing[0], newOddPairing[2]] = [newOddPairing[2], newOddPairing[0]]
+  }
+
 
   try {
     fs.writeFileSync('./utils/data/lastPairings.json', JSON.stringify(lastPairings, null, 2), 'utf-8');
