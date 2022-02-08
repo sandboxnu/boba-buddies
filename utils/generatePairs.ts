@@ -1,5 +1,6 @@
 import { App } from "@slack/bolt";
-import lastPairings from './lastPairing.json';
+import lastPairings from './lastPairings.json';
+import fs from 'fs';
 
 //TODO: change this to actual channel id when deploying
 const TESTING_CHANNEL_ID = "C02J6R0SUSX";
@@ -52,20 +53,24 @@ function shuffle(array: string[]): string[] {
 }
 
 export const shiftByOne = (): string[][]  => {
+  // get first person in each pairing
   const firstPersonList = lastPairings.map((pairs) => pairs[0])
 
+  // put first person at end of list (shifting everyone up one)
   const firstElem = firstPersonList.shift()
   if (firstElem) {
     firstPersonList.push(firstElem)
   }
 
+  // update pairings with new first person
   const modifiedPairings = lastPairings.map((pairs, ind) => [firstPersonList[ind], pairs[1]])
 
-  let json = JSON.stringify(modifiedPairings);
-  let fs = require('fs');
-  fs.writeFile('lastPairing.json', json, (err: Error) => {
-    console.log('get fucked', err)
-  });
+  try {
+    const fs = require('fs');
+    fs.writeFileSync('./lastPairings.json', JSON.stringify(modifiedPairings), 'utf-8');
+  } catch (err) {
+    console.error(err)
+  }
 
   return modifiedPairings;
 }
