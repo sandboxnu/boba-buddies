@@ -4,7 +4,7 @@ import { App } from "@slack/bolt";
 const TESTING_CHANNEL_ID = "C02J6R0SUSX";
 export const BOT_USER_ID = "U02J904RH1S";
 
-const generatePairs = async (app: App) => {
+export const generatePairs = async (app: App) => {
     const membersResponse = await app.client.conversations.members({channel: TESTING_CHANNEL_ID})
     const memberIDs = shuffle(membersResponse.members?.filter((userID: string) => userID !== BOT_USER_ID) as string[])
     const pairs: string[][] = [];
@@ -33,7 +33,7 @@ const generatePairs = async (app: App) => {
 
 // stackoverflow said fisher-yates good shuffle algorithm, so i copy pasta away
 function shuffle(array: string[]): string[] {
-  var m = array.length, t, i;
+  let m = array.length, t, i;
 
   // While there remain elements to shuffle…
   while (m) {
@@ -50,4 +50,43 @@ function shuffle(array: string[]): string[] {
   return array;
 }
 
-export default generatePairs;
+export const shiftByOne = async (): Promise<string[][]>  => {
+  const fs = require('fs');
+  let lastPairings = require('./data/lastPairings.json');
+
+  // get first person in each pairing
+  const firstPersonList = lastPairings.map((pair: string[]) => pair[0])
+
+  // get odd group
+  const oddGroup = lastPairings.filter((pair: string[]) => pair.length === 3)[0]
+
+  // put first person at end of list (shifting everyone up one)
+  const firstElem = firstPersonList.shift()
+  firstPersonList.push(firstElem)
+
+  // update pairings with new first person
+  lastPairings = lastPairings.map((pairs: string[], ind: number) => [firstPersonList[ind], pairs[1]])
+
+  // get last person
+  let oddPersonOut: string;
+  if (oddGroup) {
+    oddPersonOut = oddGroup[2];
+    const oddPersonIndex = Math.floor(Math.random() * lastPairings.length);
+    const newOddPairing = lastPairings[oddPersonIndex];
+    newOddPairing.push(oddPersonOut);
+    [newOddPairing[0], newOddPairing[2]] = [newOddPairing[2], newOddPairing[0]]
+  }
+
+
+  try {
+    fs.writeFileSync('./utils/data/lastPairings.json', JSON.stringify(lastPairings, null, 2), 'utf-8');
+  } catch (err) {
+    console.error(err)
+  }
+
+  return lastPairings;
+}
+
+module.exports = {
+  shiftByOne, generatePairs
+}
