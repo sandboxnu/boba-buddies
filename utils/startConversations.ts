@@ -25,13 +25,13 @@ export const startConversations = async (app: App) => {
     for (const pair of pairs) {
       // generate users string
       const users: string = pair.join(",");
-  
+
       // open DM between users
       const conversationResponse: ConversationsOpenResponse = await app.client.conversations.open({users: users});
       if (!conversationResponse.ok) {
         console.log(`Conversation could not be opened. Error: ${conversationResponse.error}`);
       }
-  
+
       // get DM conversation id from the response
       if (conversationResponse.channel) {
         const conversationId: string = conversationResponse.channel.id as string;
@@ -39,7 +39,7 @@ export const startConversations = async (app: App) => {
         const introMessageResponse: ChatPostMessageResponse = await app.client.chat.postMessage({channel: conversationId, text: INTRO_MSG});
         const icebreaker = ICEBREAKERS[Math.floor(Math.random() * ICEBREAKERS.length)];
         const icebreakerResponse: ChatPostMessageResponse = await app.client.chat.postMessage({channel: conversationId, text: icebreaker});
-  
+
         if (!introMessageResponse.ok) {
           console.log(`Intro message could not be sent. Error: ${introMessageResponse.error}`);
         }
@@ -49,7 +49,7 @@ export const startConversations = async (app: App) => {
 
         channelAndPairs.set(conversationId, pair);
       }
-      
+
     }
     var storedPairs = JSON.stringify(Array.from(channelAndPairs.entries()));
     fs.writeFileSync('./utils/pairings.json', storedPairs);
