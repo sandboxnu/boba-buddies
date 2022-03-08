@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "cross-env PAIRINGS_PATH=./__tests__/testPairings.json jest",
-    "build": "tsc"
+    "build": "tsc",
+    "pair": "ts-node pairAndIntroduce.ts"
   },
   "repository": {
     "type": "git",

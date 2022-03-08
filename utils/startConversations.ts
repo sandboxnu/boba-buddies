@@ -1,6 +1,6 @@
 import { App } from "@slack/bolt";
 import { ChatPostMessageResponse, ConversationsOpenResponse } from '@slack/web-api';
-import generatePairs from "./generatePairs";
+import { generatePairs } from "./generatePairs";
 import fs from 'fs';
 
 const INTRO_MSG = "Say hi to your boba buddy!"
