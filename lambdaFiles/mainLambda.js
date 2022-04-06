@@ -50,12 +50,17 @@ function resendText(event, callback) {
     sendMessage(text, channel);
     putObjectInS3(text);
   }
-  callback(null);
 }
 
 function handleInteractions(callback) {
+  const responseSuccess = {
+    statusCode: 200,
+    body: JSON.stringify({
+      message: "ok",
+    }),
+  };
   console.log("pressed button");
-  callback(null, "ok");
+  callback(undefined, responseSuccess);
 }
 
 exports.handler = (data, context, callback) => {
@@ -73,5 +78,6 @@ exports.handler = (data, context, callback) => {
     default:
       console.log("What is going on");
       callback(null);
+      break;
   }
 };
