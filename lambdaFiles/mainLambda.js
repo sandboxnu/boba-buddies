@@ -66,7 +66,6 @@ exports.handler = (data, context, callback) => {
     case "/event-handler":
       const body = JSON.parse(data.body);
       //resendText(body["event"], callback);
-      callback(null);
       break;
     case "/interactive-handler":
       handleInteractions(callback);
