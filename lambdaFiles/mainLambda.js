@@ -61,13 +61,14 @@ function resendText(event, callback) {
   }
 }
 
-function handleInteractions(callback) {
-  console.log("pressed button");
+function handleInteractions(payload, callback) {
+  const buttonValue = payload.actions[0].value;
+  console.log("button pressed:", buttonValue);
   callback(undefined, responseSuccess);
 }
 
 exports.handler = (data, context, callback) => {
-  console.log(data);
+  console.log(data.body);
   const resource = data.resource;
 
   switch (resource) {
@@ -76,7 +77,10 @@ exports.handler = (data, context, callback) => {
       resendText(body["event"], callback);
       break;
     case "/interactive-handler":
-      handleInteractions(callback);
+      const payload = data.body.replace("payload=", "");
+      const decodedPayload = decodeURIComponent(payload).replace(/\+/g, "%20");
+      const payLoadJSON = JSON.parse(decodedPayload);
+      handleInteractions(payLoadJSON, callback);
       break;
     default:
       console.log("What is going on");
