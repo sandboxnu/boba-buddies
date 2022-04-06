@@ -6,6 +6,12 @@ const https = require("https"),
   qs = require("querystring"),
   ACCESS_TOKEN = process.env.BOT_TOKEN;
 
+const responseSuccess = {
+  statusCode: 200,
+  body: JSON.stringify({
+    message: "ok",
+  }),
+};
 /**
  * Sends a message as boba buddy to the given channel
  * @param {string} text the message being sent
@@ -31,7 +37,6 @@ function putObjectInS3(text) {
     Body: JSON.stringify({ text }),
     ContentType: "application/json; charset=utf-8",
   };
-  console.log(text);
   s3.putObject(params, (err, data) => {
     if (err) console.log(err);
     else console.log(data);
@@ -49,16 +54,14 @@ function resendText(event, callback) {
     const { text, channel } = event;
     sendMessage(text, channel);
     putObjectInS3(text);
+    callback(undefined, responseSuccess);
+  } else {
+    console.log("don't respond to self");
+    callback(undefined, responseSuccess);
   }
 }
 
 function handleInteractions(callback) {
-  const responseSuccess = {
-    statusCode: 200,
-    body: JSON.stringify({
-      message: "ok",
-    }),
-  };
   console.log("pressed button");
   callback(undefined, responseSuccess);
 }
@@ -70,14 +73,14 @@ exports.handler = (data, context, callback) => {
   switch (resource) {
     case "/event-handler":
       const body = JSON.parse(data.body);
-      //resendText(body["event"], callback);
+      resendText(body["event"], callback);
       break;
     case "/interactive-handler":
       handleInteractions(callback);
       break;
     default:
       console.log("What is going on");
-      callback(null);
+      callback(undefined, responseSuccess);
       break;
   }
 };
