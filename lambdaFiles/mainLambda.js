@@ -75,10 +75,8 @@ function resendText(event, callback) {
   if (!event.bot_id && event.channel_type === "im") {
     const { text, channel } = event;
     sendMessage(text, channel);
-    callback(undefined, responseSuccess);
-  } else {
-    callback(undefined, responseSuccess);
   }
+  callback(undefined, responseSuccess);
 }
 
 // handles when users click the Yes or No Kek buttons
