@@ -48,12 +48,11 @@ function putObjectInS3(body) {
 }
 
 // fetches file with given name (key). parses file content as JSON
-// updates pairsMet
-async function getObjectFromS3() {
+async function getObjectFromS3(key) {
   var s3 = new AWS.S3();
   var getParams = {
     Bucket: config.S3_BUCKET_NAME,
-    Key: PAIRS_MET_PATH,
+    Key: key,
   };
   await s3.getObject(getParams, function (err, data) {
     // callback
@@ -85,7 +84,7 @@ function resendText(event, callback) {
 // handles when users click the Yes or No Kek buttons
 async function handleInteractions(payload, callback) {
   const buttonValue = payload.actions[0].value;
-  const response = getObjectFromS3();
+  const response = getObjectFromS3(PAIRS_MET_PATH);
   response.then((response) => {
     // updates pairsMet if we already already exists in file
     if (response && response["pairsMet"]) {
