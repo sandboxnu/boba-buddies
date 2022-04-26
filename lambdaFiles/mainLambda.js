@@ -101,12 +101,13 @@ exports.handler = (data, context, callback) => {
   const resource = data.resource;
 
   switch (resource) {
+    // called when messaging Bot
     case "/event-handler":
       const body = JSON.parse(data.body);
       resendText(body["event"], callback);
       break;
+    // called when interactive button pressed
     case "/interactive-handler":
-      // when press button
       const payload = data.body.replace("payload=", "");
       const decodedPayload = decodeURIComponent(payload).replace(/\+/g, "%20");
       const payLoadJSON = JSON.parse(decodedPayload);
