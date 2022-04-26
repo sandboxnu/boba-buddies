@@ -55,7 +55,7 @@ async function getObjectFromS3() {
     Bucket: config.S3_BUCKET_NAME,
     Key: PAIRS_MET_PATH,
   };
-  s3.getObject(getParams, function (err, data) {
+  await s3.getObject(getParams, function (err, data) {
     // callback
     if (err) {
       console.log(err);
@@ -66,6 +66,7 @@ async function getObjectFromS3() {
       if (response && response["pairsMet"]) {
         pairsMet = response["pairsMet"];
       }
+      return response;
     }
   });
 }
@@ -86,10 +87,10 @@ function resendText(event, callback) {
 }
 
 // handles when users click the Yes or No Kek buttons
-function handleInteractions(payload, callback) {
+async function handleInteractions(payload, callback) {
   const buttonValue = payload.actions[0].value;
-  getObjectFromS3();
-
+  const response = await getObjectFromS3();
+  console.log("response", response);
   if (buttonValue === "yes") {
     pairsMet += 1;
     console.log(pairsMet);
