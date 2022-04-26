@@ -12,6 +12,10 @@ const responseSuccess = {
     message: "ok",
   }),
 };
+
+const PAIRS_MET_PATH = "pairsMet.json";
+
+let pairsMet = 0;
 /**
  * Sends a message as boba buddy to the given channel
  * @param {string} text the message being sent
@@ -29,12 +33,12 @@ function sendMessage(text, channel) {
   https.get(options);
 }
 
-function putObjectInS3(text) {
+function putObjectInS3(body) {
   var s3 = new AWS.S3();
   var params = {
     Bucket: config.S3_BUCKET_NAME,
-    Key: "boba-buddies/text.json",
-    Body: JSON.stringify({ text }),
+    Key: PAIRS_MET_PATH,
+    Body: JSON.stringify(body),
     ContentType: "application/json; charset=utf-8",
   };
   s3.putObject(params, (err, data) => {
@@ -43,27 +47,56 @@ function putObjectInS3(text) {
   });
 }
 
+// fetches file with given name (key). parses file content as JSON
+// updates pairsMet
+async function getObjectFromS3() {
+  var s3 = new AWS.S3();
+  var getParams = {
+    Bucket: config.S3_BUCKET_NAME,
+    Key: PAIRS_MET_PATH,
+  };
+  s3.getObject(getParams, function (err, data) {
+    // callback
+    if (err) {
+      console.log(err);
+      return undefined;
+    } else {
+      const response = JSON.parse(data.Body.toString());
+      // updates pairsMet if we already already exists in file
+      if (response && response["pairsMet"]) {
+        pairsMet = response["pairsMet"];
+      }
+    }
+  });
+}
+
 /**
  * resends the direct message being sent to it
+ * Used for testing lambda/slack connection only
  */
 function resendText(event, callback) {
   // test ensures that message isnt from a bot and is a direct message
-
-  console.log(event.bot_id, !event.bot_id);
   if (!event.bot_id && event.channel_type === "im") {
     const { text, channel } = event;
     sendMessage(text, channel);
-    putObjectInS3(text);
     callback(undefined, responseSuccess);
   } else {
-    console.log("don't respond to self");
     callback(undefined, responseSuccess);
   }
 }
 
+// handles when users click the Yes or No Kek buttons
 function handleInteractions(payload, callback) {
   const buttonValue = payload.actions[0].value;
+  getObjectFromS3();
+
+  if (buttonValue === "yes") {
+    pairsMet += 1;
+    console.log(pairsMet);
+  }
   console.log("button pressed:", buttonValue);
+  // update pairsMet value in file
+  putObjectInS3({ pairsMet: pairsMet });
   callback(undefined, responseSuccess);
 }
 
@@ -77,13 +110,14 @@ exports.handler = (data, context, callback) => {
       resendText(body["event"], callback);
       break;
     case "/interactive-handler":
+      // when press button
       const payload = data.body.replace("payload=", "");
       const decodedPayload = decodeURIComponent(payload).replace(/\+/g, "%20");
       const payLoadJSON = JSON.parse(decodedPayload);
       handleInteractions(payLoadJSON, callback);
       break;
     default:
-      console.log("What is going on");
+      console.log("unhandled data type");
       callback(undefined, responseSuccess);
       break;
   }
