@@ -62,10 +62,6 @@ async function getObjectFromS3() {
       return undefined;
     } else {
       const response = JSON.parse(data.Body.toString());
-      // updates pairsMet if we already already exists in file
-      if (response && response["pairsMet"]) {
-        pairsMet = response["pairsMet"];
-      }
       return response;
     }
   });
@@ -89,16 +85,22 @@ function resendText(event, callback) {
 // handles when users click the Yes or No Kek buttons
 async function handleInteractions(payload, callback) {
   const buttonValue = payload.actions[0].value;
-  const response = await getObjectFromS3();
-  console.log("response", response);
-  if (buttonValue === "yes") {
-    pairsMet += 1;
-    console.log(pairsMet);
-  }
-  console.log("button pressed:", buttonValue);
-  // update pairsMet value in file
-  putObjectInS3({ pairsMet: pairsMet });
-  callback(undefined, responseSuccess);
+  const response = getObjectFromS3();
+  response.then((response) => {
+    // updates pairsMet if we already already exists in file
+    if (response && response["pairsMet"]) {
+      pairsMet = response["pairsMet"];
+    }
+    console.log("response", response);
+    if (buttonValue === "yes") {
+      pairsMet += 1;
+      console.log(pairsMet);
+    }
+    console.log("button pressed:", buttonValue);
+    // update pairsMet value in file
+    putObjectInS3({ pairsMet: pairsMet });
+    callback(undefined, responseSuccess);
+  });
 }
 
 exports.handler = (data, context, callback) => {
