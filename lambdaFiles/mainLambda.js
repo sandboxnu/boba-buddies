@@ -83,19 +83,16 @@ function resendText(event, callback) {
 
 // handles when users click the Yes or No Kek buttons
 async function handleInteractions(payload, callback) {
-  const buttonValue = payload.actions[0].value;
+  const buttonValue = payload.actions[0].value; // one of "yes" or "no"
   const response = getObjectFromS3(PAIRS_MET_PATH);
   response.then((response) => {
     // updates pairsMet if we already already exists in file
     if (response && response["pairsMet"]) {
       pairsMet = response["pairsMet"];
     }
-    console.log("response", response);
     if (buttonValue === "yes") {
       pairsMet += 1;
-      console.log(pairsMet);
     }
-    console.log("button pressed:", buttonValue);
     // update pairsMet value in file
     putObjectInS3({ pairsMet: pairsMet });
     callback(undefined, responseSuccess);
@@ -103,7 +100,6 @@ async function handleInteractions(payload, callback) {
 }
 
 exports.handler = (data, context, callback) => {
-  console.log(data.body);
   const resource = data.resource;
 
   switch (resource) {
