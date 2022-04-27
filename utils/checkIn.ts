@@ -24,6 +24,7 @@ export const checkIn = async (app: App) => {
         }
      
         if (historyResponse.messages) {
+            //TODO: fix this shit later
             const userMessages = historyResponse.messages.filter(message => message.user !== BOT_USER_ID);
             if (userMessages.length > 0) {
                 const goodJobMessageResponse: ChatPostMessageResponse = await app.client.chat.postMessage({channel: channelId, text: 'Thank you for talking to each other!!!'});

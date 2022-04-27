@@ -1,5 +1,4 @@
 import { App } from '@slack/bolt';
-import { findConversation } from './utils/buttons';
 
 require('dotenv').config();
 // Initializes your app with your bot token and signing secret
@@ -10,4 +9,3 @@ const app = new App({
   appToken: process.env.SLACK_APP_TOKEN // add this
 });
 
-findConversation(app).catch((e) => console.error(e['data']));

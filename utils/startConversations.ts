@@ -52,5 +52,5 @@ export const startConversations = async (app: App) => {
 
     }
     var storedPairs = JSON.stringify(Array.from(channelAndPairs.entries()));
-    fs.writeFileSync('./utils/pairings.json', storedPairs);
+    fs.writeFileSync('./utils/data/pairings.json', storedPairs);
   }
