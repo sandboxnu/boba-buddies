@@ -1,4 +1,4 @@
-import { checkIn } from "../utils/checkIn";
+import { checkMessageHistory } from "../utils/checkMessageHistory";
 
 describe('testing the util function for checking in on past pairings', () =>{
     const mockApp: any = {
@@ -22,7 +22,7 @@ describe('testing the util function for checking in on past pairings', () =>{
         mockApp.client.conversations = mockConversations;
         mockApp.client.chat = mockChat;
 
-        await checkIn(mockApp);
+        await checkMessageHistory(mockApp);
 
         expect(mockConversations.history).toHaveBeenCalled();
         expect(mockChat.postMessage).toHaveBeenCalledWith({channel: "test_channel", text: 'Thank you for talking to each other!!!'});
@@ -38,7 +38,7 @@ describe('testing the util function for checking in on past pairings', () =>{
         mockApp.client.conversations = mockConversations;
         mockApp.client.chat = mockChat;
 
-        await checkIn(mockApp);
+        await checkMessageHistory(mockApp);
 
         expect(mockConversations.history).toHaveBeenCalled();
         expect(mockChat.postMessage).toHaveBeenCalledWith({channel: "test_channel", text: "SAY SOMETHING NOW <@Jia>!!"});

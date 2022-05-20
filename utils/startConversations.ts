@@ -18,6 +18,7 @@ const ICEBREAKERS = [ICEBREAKER_1, ICEBREAKER_2, ICEBREAKER_3, ICEBREAKER_4, ICE
 
 export const startConversations = async (app: App) => {
 
+    // TODO: make the pairs something we either generate or just shift by one
     const pairs = await generatePairs(app);
     const channelAndPairs = new Map<string, string[]>();
 
@@ -51,6 +52,6 @@ export const startConversations = async (app: App) => {
       }
 
     }
-    var storedPairs = JSON.stringify(Array.from(channelAndPairs.entries()));
-    fs.writeFileSync('./utils/data/pairings.json', storedPairs);
+    // TODO: Find someone who can run the code to test this
+    fs.writeFileSync('./utils/data/pairings.json', JSON.stringify(Object.fromEntries(channelAndPairs),null, 2));
   }

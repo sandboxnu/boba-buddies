@@ -38,7 +38,7 @@ const CheckIn = (convoId: string) => ({
   ],
 });
 
-export async function findConversation(app: App) {
+export async function sendCheckInDM(app: App) {
   for (const pair of pairings) {
     const conversationId = pair[0].toString();
     // post messages to convo id
@@ -48,7 +48,7 @@ export async function findConversation(app: App) {
     // error logging
     if (!checkInMessageResponse.ok) {
       console.log(
-        `Intro message could not be sent. Error: ${checkInMessageResponse.error}`
+        `Check in message could not be sent. Error: ${checkInMessageResponse.error}`
       );
     }
   }

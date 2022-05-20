@@ -50,12 +50,12 @@ function shuffle(array: string[]): string[] {
   return array;
 }
 
-export const shiftByOne = async (): Promise<string[][]>  => {
+export const shiftByOne = (): Promise<string[][]>  => {
   const fs = require('fs');
-  let lastPairings = require('./data/lastPairings.json');
+  let lastPairings = require('./data/pairings.json');
 
   // get first person in each pairing
-  const firstPersonList = lastPairings.map((pair: string[]) => pair[0])
+  const firstPersonList = Object.keys(lastPairings).map((convoId:string) => lastPairings[convoId][0])
 
   // get odd group
   const oddGroup = lastPairings.filter((pair: string[]) => pair.length === 3)[0]
@@ -76,7 +76,6 @@ export const shiftByOne = async (): Promise<string[][]>  => {
     newOddPairing.push(oddPersonOut);
     [newOddPairing[0], newOddPairing[2]] = [newOddPairing[2], newOddPairing[0]]
   }
-
 
   try {
     fs.writeFileSync('./utils/data/lastPairings.json', JSON.stringify(lastPairings, null, 2), 'utf-8');
