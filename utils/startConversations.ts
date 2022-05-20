@@ -16,10 +16,7 @@ const ICEBREAKER_9 = "If you were a potato, how would you like to be cooked?"
 const ICEBREAKER_10 = "What hobbies do you have (outside of Sandbox)?"
 const ICEBREAKERS = [ICEBREAKER_1, ICEBREAKER_2, ICEBREAKER_3, ICEBREAKER_4, ICEBREAKER_5, ICEBREAKER_6, ICEBREAKER_7, ICEBREAKER_8, ICEBREAKER_9, ICEBREAKER_10]
 
-export const startConversations = async (app: App) => {
-
-    // TODO: make the pairs something we either generate or just shift by one
-    const pairs = await generatePairs(app);
+export const startConversations = async (app: App, pairs: string[][]) => {
     const channelAndPairs = new Map<string, string[]>();
 
     // iterate through all pairs to open a DM and send an intro message

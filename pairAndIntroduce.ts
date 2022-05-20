@@ -1,4 +1,7 @@
 import { App } from '@slack/bolt';
+import { generatePairs, shiftByOne } from './utils/generatePairs';
+import { startConversations } from './utils/startConversations';
+import { sendCheckInDM } from './utils/buttons';
 
 require('dotenv').config();
 // Initializes your app with your bot token and signing secret
@@ -12,14 +15,32 @@ const app = new App({
 /*
  TODO: implement garbage here
  - check date relative to pairing date
- - if been two weeks => new pairings!
-   - if first time pairing (ok this happens once) => generatePairs()
-   - else we just want to shift => shiftByOne()
-   - send pairs to startConversation()
-   - reset the pairing date
- - it's been one week => check in!
-   - ok call the checkIn() and pray the lambda handles it
  - someone figure out how to set some timer so this process doesn't run 10 times a second
  */
 
+// TODO: this should not be this lmao
+let pairingDate = new Date();
+const firstPairing = true
+
+const currDate = new Date();
+
+// @ts-ignore
+if (Math.abs(currDate - pairingDate) > 60480000 * 2) { // Two weeks, re-gen pairs
+  let pairs;
+  if (firstPairing) {
+    generatePairs(app).then(r => pairs = r)
+  } else {
+    pairs = shiftByOne()
+  }
+
+  if (pairs) {
+    startConversations(app, pairs).then(r => console.log("wow we're nasty - started convo"))
+  }
+
+  pairingDate = currDate
+} else { // @ts-ignore
+  if (Math.abs(currDate - pairingDate) > 60480000) { // TODO: this ts-ignore feels wrong, one week check in
+    sendCheckInDM(app).then(r => console.log("lfg - sent check in"))
+  }
+}
 
