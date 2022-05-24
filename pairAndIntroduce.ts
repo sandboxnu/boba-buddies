@@ -12,44 +12,38 @@ const app = new App({
   appToken: process.env.SLACK_APP_TOKEN // add this
 });
 
-let pairingDate = new Date(1652733304000);
-setInterval(() => {
-  console.log('gets into interval')
-  /*
- TODO: implement garbage here
- - check date relative to pairing date
- - someone figure out how to set some timer so this process doesn't run 10 times a second
- */
+const ONE_WEEK_MS = 604800000
+let pairingDate = new Date(1652735785000); // TODO: change this to actual start date
+let isCheckedIn = false;
+let firstPairing = true;
 
-// TODO: this should not be this lmao
-  const firstPairing = true
-
+setInterval(async () => {
   const currDate = new Date();
 
-  console.log('previous date' + pairingDate)
-  console.log('current date' + currDate)
-
   // @ts-ignore
-  if (Math.abs(currDate - pairingDate) > (604800000 * 2)) { // Two weeks, re-gen pairs
-    console.log('its been two weeks')
+  if (Math.abs(currDate - pairingDate) > (ONE_WEEK_MS * 2)) { // Two weeks, re-gen pairs
     let pairs;
     if (firstPairing) {
-      generatePairs(app).then(r => pairs = r)
+      firstPairing = false;
+      pairs = await generatePairs(app)
+
     } else {
       pairs = shiftByOne()
     }
 
     if (pairs) {
-      console.log('success')
-      startConversations(app, pairs).then(() => console.log("wow we're nasty - started convo"))
+      await startConversations(app, pairs)
+      console.log("wow we're nasty - started convo")
     }
 
     pairingDate = currDate
+    isCheckedIn = false;
   } else { // @ts-ignore
-    if (Math.abs(currDate - pairingDate) > 604800000) { // TODO: this ts-ignore feels wrong, one week check in
-      console.log('its been one week')
-      sendCheckInDM(app).then(() => console.log("lfg - sent check in"))
+    if (!isCheckedIn && Math.abs(currDate - pairingDate) > ONE_WEEK_MS) { // TODO: this ts-ignore feels wrong, one week check in
+      await sendCheckInDM(app)
+      isCheckedIn = true;
+      console.log("lfg - sent check in")
     }
   }
-}, 3 * 1000);
+}, ONE_WEEK_MS);
 
