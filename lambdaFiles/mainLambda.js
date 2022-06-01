@@ -78,12 +78,15 @@ function resendText(event, callback) {
   callback(undefined, responseSuccess);
 }
 
-// updates the checkin message (kekw yes or no buttons) with a message that thanks them for their response
+// updates the checkin message (kekw yes or no buttons) with a message that confirms their response
 // prevents spamming of kekw buttons bc buttons no longer accessible
-function updateCheckinMessage(responseUrl) {
+function updateCheckinMessage(responseUrl, user, buttonValue) {
   var postData = JSON.stringify({
     replace_original: "true", // edits original message
-    text: "Thanks for your response!", // TODO: make this more specific- who responded?  did you meet?
+    text:
+      buttonValue === "yes"
+        ? `${user.name} said you met! :happy-panda:`
+        : `${user.name} said you have not met! SADGE ;-; `, // TODO: make this more specific- who responded?  did you meet?
   });
 
   const searchTerm = ".com/";
@@ -116,6 +119,7 @@ function updateCheckinMessage(responseUrl) {
 // handles when users click the Yes or No Kek buttons
 async function handleButtonInteraction(payload, callback) {
   const buttonValue = payload.actions[0].value; // one of "yes" or "no"
+  const user = payload.user; // the user who pressed the button.
   const response = getObjectFromS3(PAIRS_MET_PATH);
   response.then((response) => {
     let pairsMet = 0;
@@ -130,7 +134,7 @@ async function handleButtonInteraction(payload, callback) {
     putObjectInS3({ pairsMet: pairsMet });
     // update message response
     const responseURL = payload["response_url"];
-    updateCheckinMessage(responseURL);
+    updateCheckinMessage(responseURL, user, buttonValue);
     callback(undefined, responseSuccess);
   });
 }
