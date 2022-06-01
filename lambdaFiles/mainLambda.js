@@ -15,7 +15,6 @@ const responseSuccess = {
 
 const PAIRS_MET_PATH = "pairsMet.json";
 
-let pairsMet = 0;
 /**
  * Sends a message as boba buddy to the given channel
  * @param {string} text the message being sent
@@ -79,10 +78,12 @@ function resendText(event, callback) {
   callback(undefined, responseSuccess);
 }
 
+// updates the checkin message (kekw yes or no buttons) with a message that thanks them for their response
+// prevents spamming of kekw buttons bc buttons no longer accessible
 function updateCheckinMessage(responseUrl) {
   var postData = JSON.stringify({
-    replace_original: "true",
-    text: "Thanks for your response!", // todo, make this more specific- who responded?  did you meet? lmao
+    replace_original: "true", // edits original message
+    text: "Thanks for your response!", // TODO: make this more specific- who responded?  did you meet?
   });
 
   const searchTerm = ".com/";
@@ -115,11 +116,12 @@ function updateCheckinMessage(responseUrl) {
   req.end();
 }
 
+// handles when users click the Yes or No Kek buttons
 async function handleButtonInteraction(payload, callback) {
-  // payload's type is assumed to be "block_actions" (https://api.slack.com/interactivity/handling)
   const buttonValue = payload.actions[0].value; // one of "yes" or "no"
   const response = getObjectFromS3(PAIRS_MET_PATH);
   response.then((response) => {
+    const pairsMet = 0;
     // updates pairsMet if we already already exists in file
     if (response && response["pairsMet"]) {
       pairsMet = response["pairsMet"];
@@ -129,16 +131,18 @@ async function handleButtonInteraction(payload, callback) {
     }
     // update pairsMet value in file
     putObjectInS3({ pairsMet: pairsMet });
-    // create a message response in callback
+    // update message response
     const responseURL = payload["response_url"];
     updateCheckinMessage(responseURL);
     callback(undefined, responseSuccess);
   });
 }
 
-// handles when users click the Yes or No Kek buttons
+// handles all slack "interaction payloads"
+// for all interaction payload types, reference slack docs: https://api.slack.com/interactivity/handling
 async function handleInteractions(payload, callback) {
   if (payload.type === "block_actions") {
+    // messages with buttons are of type "block_actions"
     handleButtonInteraction(payload, callback);
   }
 }
