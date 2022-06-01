@@ -91,7 +91,6 @@ function updateCheckinMessage(responseUrl) {
 
   const pathSubstring = responseUrl.substring(indexOfFirst + 4);
 
-
   var options = {
     hostname: "hooks.slack.com",
     path: pathSubstring,
@@ -119,7 +118,7 @@ async function handleButtonInteraction(payload, callback) {
   const buttonValue = payload.actions[0].value; // one of "yes" or "no"
   const response = getObjectFromS3(PAIRS_MET_PATH);
   response.then((response) => {
-    const pairsMet = 0;
+    let pairsMet = 0;
     // updates pairsMet if we already already exists in file
     if (response && response["pairsMet"]) {
       pairsMet = response["pairsMet"];
