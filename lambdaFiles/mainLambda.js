@@ -79,8 +79,44 @@ function resendText(event, callback) {
   callback(undefined, responseSuccess);
 }
 
-// handles when users click the Yes or No Kek buttons
-async function handleInteractions(payload, callback) {
+function updateCheckinMessage(responseUrl) {
+  var postData = JSON.stringify({
+    replace_original: "true",
+    text: "Thanks for your response!", // todo, make this more specific- who responded?  did you meet? lmao
+  });
+
+  const searchTerm = ".com/";
+  const indexOfFirst = responseUrl.indexOf(searchTerm);
+
+  const pathSubstring = responseUrl.substring(indexOfFirst + 4);
+
+  console.log("path", pathSubstring);
+  console.log("responseURL", responseUrl);
+  responseUrl;
+  var options = {
+    hostname: "hooks.slack.com",
+    path: pathSubstring,
+    method: "POST",
+  };
+
+  var req = https.request(options, (res) => {
+    console.log("statusCode:", res.statusCode);
+
+    res.on("data", (d) => {
+      process.stdout.write(d);
+    });
+  });
+
+  req.on("error", (e) => {
+    console.error(e);
+  });
+
+  req.write(postData);
+  req.end();
+}
+
+async function handleButtonInteraction(payload, callback) {
+  // payload's type is assumed to be "block_actions" (https://api.slack.com/interactivity/handling)
   const buttonValue = payload.actions[0].value; // one of "yes" or "no"
   const response = getObjectFromS3(PAIRS_MET_PATH);
   response.then((response) => {
@@ -93,8 +129,18 @@ async function handleInteractions(payload, callback) {
     }
     // update pairsMet value in file
     putObjectInS3({ pairsMet: pairsMet });
+    // create a message response in callback
+    const responseURL = payload["response_url"];
+    updateCheckinMessage(responseURL);
     callback(undefined, responseSuccess);
   });
+}
+
+// handles when users click the Yes or No Kek buttons
+async function handleInteractions(payload, callback) {
+  if (payload.type === "block_actions") {
+    handleButtonInteraction(payload, callback);
+  }
 }
 
 exports.handler = (data, context, callback) => {
