@@ -91,8 +91,7 @@ function updateCheckinMessage(responseUrl) {
 
   const pathSubstring = responseUrl.substring(indexOfFirst + 4);
 
-  console.log("path", pathSubstring);
-  console.log("responseURL", responseUrl);
+
   responseUrl;
   var options = {
     hostname: "hooks.slack.com",
