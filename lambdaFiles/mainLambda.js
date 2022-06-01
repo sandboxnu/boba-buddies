@@ -86,7 +86,7 @@ function updateCheckinMessage(responseUrl, user, buttonValue) {
     text:
       buttonValue === "yes"
         ? `${user.name} said you met! :happy-panda:`
-        : `${user.name} said you have not met! SADGE ;-; `, // TODO: make this more specific- who responded?  did you meet?
+        : `${user.name} said you have not met! SADGE ;-; `, // TODO: show display name instead of user.name
   });
 
   const searchTerm = ".com/";
