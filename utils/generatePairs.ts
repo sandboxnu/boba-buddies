@@ -50,9 +50,10 @@ function shuffle(array: string[]): string[] {
   return array;
 }
 
-export const shiftByOne = async (): Promise<string[][]>  => {
-  const fs = require('fs');
-  let lastPairings = require('./data/lastPairings.json');
+// Shift the first person in each group to create new pairs
+export const shiftByOne = (): string[][]  => {
+  let prevPairings = require('./data/pairings.json');
+  let lastPairings: string[][] = Object.values(prevPairings)
 
   // get first person in each pairing
   const firstPersonList = lastPairings.map((pair: string[]) => pair[0])
@@ -62,7 +63,9 @@ export const shiftByOne = async (): Promise<string[][]>  => {
 
   // put first person at end of list (shifting everyone up one)
   const firstElem = firstPersonList.shift()
-  firstPersonList.push(firstElem)
+  if (firstElem) {  // TODO: TS is being a whore about this
+    firstPersonList.push(firstElem)
+  }
 
   // update pairings with new first person
   lastPairings = lastPairings.map((pairs: string[], ind: number) => [firstPersonList[ind], pairs[1]])
@@ -75,13 +78,6 @@ export const shiftByOne = async (): Promise<string[][]>  => {
     const newOddPairing = lastPairings[oddPersonIndex];
     newOddPairing.push(oddPersonOut);
     [newOddPairing[0], newOddPairing[2]] = [newOddPairing[2], newOddPairing[0]]
-  }
-
-
-  try {
-    fs.writeFileSync('./utils/data/lastPairings.json', JSON.stringify(lastPairings, null, 2), 'utf-8');
-  } catch (err) {
-    console.error(err)
   }
 
   return lastPairings;

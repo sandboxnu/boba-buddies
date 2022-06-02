@@ -84,14 +84,14 @@ describe('testing the util function for generating pairs', () =>{
         expect(mockConversations.members).toHaveBeenCalled();
     })
 
-    it('should shift member by one', async () => {
-        jest.mock('../utils/data/lastPairings.json', ()=>([
-              ["a", "b"],
-              ["c", "d"],
-              ["e", "f", "g"]
-          ]
-        ))
-        const actualList = await shiftByOne();
+    it('should shift member by one',  () => {
+        jest.mock('../utils/data/pairings.json', ()=>({
+              "1": ["a", "b"],
+              "2": ["c", "d"],
+              "3": ["e", "f", "g"]
+        }))
+
+        const actualList = shiftByOne();
 
         expect(actualList).toStrictEqual([['c', 'b'], ['g', 'd', 'e'], ['a', 'f']])
     })

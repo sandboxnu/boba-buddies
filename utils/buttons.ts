@@ -38,17 +38,16 @@ const CheckIn = (convoId: string) => ({
   ],
 });
 
-export async function findConversation(app: App) {
-  for (const pair of pairings) {
-    const conversationId = pair[0].toString();
+export async function sendCheckInDM(app: App) {
+  for (const convoID of Object.keys(pairings)) {
     // post messages to convo id
     const checkInMessageResponse: ChatPostMessageResponse =
-      await app.client.chat.postMessage(CheckIn(conversationId));
+      await app.client.chat.postMessage(CheckIn(convoID));
 
     // error logging
     if (!checkInMessageResponse.ok) {
       console.log(
-        `Intro message could not be sent. Error: ${checkInMessageResponse.error}`
+        `Check in message could not be sent. Error: ${checkInMessageResponse.error}`
       );
     }
   }
