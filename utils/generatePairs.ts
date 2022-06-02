@@ -50,7 +50,6 @@ function shuffle(array: string[]): string[] {
   return array;
 }
 
-// TODO: pls someone with an inferior computer please test if this actually works since I can't run the app lmao
 // Shift the first person in each group to create new pairs
 export const shiftByOne = (): string[][]  => {
   let prevPairings = require('./data/pairings.json');

@@ -49,6 +49,5 @@ export const startConversations = async (app: App, pairs: string[][]) => {
       }
 
     }
-    // TODO: Find someone who can run the code to test this
     fs.writeFileSync('./utils/data/pairings.json', JSON.stringify(Object.fromEntries(channelAndPairs),null, 2));
   }
