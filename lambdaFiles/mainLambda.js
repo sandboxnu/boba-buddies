@@ -40,9 +40,9 @@ function getUserDisplayName(userID) {
     headers: { Authorization: `Bearer ${ACCESS_TOKEN}` },
   };
 
-  return new Promise(function (resolve, reject) {
+  return new Promise((resolve, reject) => {
     https.get(options, (res) => {
-      res.on("data", function (response) {
+      res.on("data", (response) => {
         response = JSON.parse(response);
         resolve(response.user.profile.display_name);
       });
@@ -75,7 +75,7 @@ async function getObjectFromS3(key) {
     Bucket: config.S3_BUCKET_NAME,
     Key: key,
   };
-  await s3.getObject(getParams, function (err, data) {
+  await s3.getObject(getParams, (err, data) => {
     // callback
     if (err) {
       console.log(err);
