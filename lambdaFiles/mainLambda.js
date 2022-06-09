@@ -32,6 +32,28 @@ function sendMessage(text, channel) {
   https.get(options);
 }
 
+// given user id, gets the user's display name
+function getUserDisplayName(userID) {
+  const options = {
+    hostname: "slack.com",
+    path: `/api/users.info?user=${userID}`,
+    headers: { Authorization: `Bearer ${ACCESS_TOKEN}` },
+  };
+
+  return new Promise(function (resolve, reject) {
+    https.get(options, (res) => {
+      res.on("data", function (response) {
+        response = JSON.parse(response);
+        resolve(response.user.profile.display_name);
+      });
+      res.on("error", (e) => {
+        console.log("Got error: " + e.message);
+        reject(e);
+      });
+    });
+  });
+}
+
 function putObjectInS3(body) {
   var s3 = new AWS.S3();
   var params = {
@@ -78,15 +100,16 @@ function resendText(event, callback) {
   callback(undefined, responseSuccess);
 }
 
-// updates the checkin message (kekw yes or no buttons) with a message that confirms their response
+// updates the checkin message (kekw yes or no buttons) with a message indicating user action
 // prevents spamming of kekw buttons bc buttons no longer accessible
-function updateCheckinMessage(responseUrl, user, buttonValue) {
+async function updateCheckinMessage(responseUrl, user, buttonValue) {
+  const userDisplayName = await getUserDisplayName(user.id);
   var postData = JSON.stringify({
     replace_original: "true", // edits original message
     text:
       buttonValue === "yes"
-        ? `${user.name} said you met! :happy-panda:`
-        : `${user.name} said you have not met! SADGE ;-; `, // TODO: show display name instead of user.name
+        ? `${userDisplayName} said you met! :happy-panda:`
+        : `${userDisplayName} said you have not met! SADGE ;-; `, // TODO: make this more specific- who responded?  did you meet?
   });
 
   const searchTerm = ".com/";
