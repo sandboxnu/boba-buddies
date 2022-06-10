@@ -15,7 +15,6 @@ const responseSuccess = {
 
 const PAIRS_MET_PATH = "pairsMet.json";
 
-let pairsMet = 0;
 /**
  * Sends a message as boba buddy to the given channel
  * @param {string} text the message being sent
@@ -31,6 +30,28 @@ function sendMessage(text, channel) {
     headers: { Authorization: `Bearer ${ACCESS_TOKEN}` },
   };
   https.get(options);
+}
+
+// given user id, gets the user's display name
+function getUserDisplayName(userID) {
+  const options = {
+    hostname: "slack.com",
+    path: `/api/users.info?user=${userID}`,
+    headers: { Authorization: `Bearer ${ACCESS_TOKEN}` },
+  };
+
+  return new Promise((resolve, reject) => {
+    https.get(options, (res) => {
+      res.on("data", (response) => {
+        response = JSON.parse(response);
+        resolve(response.user.profile.display_name);
+      });
+      res.on("error", (e) => {
+        console.log("Got error: " + e.message);
+        reject(e);
+      });
+    });
+  });
 }
 
 function putObjectInS3(body) {
@@ -54,7 +75,7 @@ async function getObjectFromS3(key) {
     Bucket: config.S3_BUCKET_NAME,
     Key: key,
   };
-  await s3.getObject(getParams, function (err, data) {
+  await s3.getObject(getParams, (err, data) => {
     // callback
     if (err) {
       console.log(err);
@@ -79,11 +100,52 @@ function resendText(event, callback) {
   callback(undefined, responseSuccess);
 }
 
+// updates the checkin message (kekw yes or no buttons) with a message indicating user action
+// prevents spamming of kekw buttons bc buttons no longer accessible
+async function updateCheckinMessage(responseUrl, user, buttonValue) {
+  const userDisplayName = await getUserDisplayName(user.id);
+  var postData = JSON.stringify({
+    replace_original: "true", // edits original message
+    text:
+      buttonValue === "yes"
+        ? `${userDisplayName} said you met! :happy-panda:`
+        : `${userDisplayName} said you have not met! SADGE ;-; `, // TODO: make this more specific- who responded?  did you meet?
+  });
+
+  const searchTerm = ".com/";
+  const indexOfFirst = responseUrl.indexOf(searchTerm);
+
+  const pathSubstring = responseUrl.substring(indexOfFirst + 4);
+
+  var options = {
+    hostname: "hooks.slack.com",
+    path: pathSubstring,
+    method: "POST",
+  };
+
+  var req = https.request(options, (res) => {
+    console.log("statusCode:", res.statusCode);
+
+    res.on("data", (d) => {
+      process.stdout.write(d);
+    });
+  });
+
+  req.on("error", (e) => {
+    console.error(e);
+  });
+
+  req.write(postData);
+  req.end();
+}
+
 // handles when users click the Yes or No Kek buttons
-async function handleInteractions(payload, callback) {
+async function handleButtonInteraction(payload, callback) {
   const buttonValue = payload.actions[0].value; // one of "yes" or "no"
+  const user = payload.user; // the user who pressed the button.
   const response = getObjectFromS3(PAIRS_MET_PATH);
   response.then((response) => {
+    let pairsMet = 0;
     // updates pairsMet if we already already exists in file
     if (response && response["pairsMet"]) {
       pairsMet = response["pairsMet"];
@@ -93,8 +155,20 @@ async function handleInteractions(payload, callback) {
     }
     // update pairsMet value in file
     putObjectInS3({ pairsMet: pairsMet });
+    // update message response
+    const responseURL = payload["response_url"];
+    updateCheckinMessage(responseURL, user, buttonValue);
     callback(undefined, responseSuccess);
   });
+}
+
+// handles all slack "interaction payloads"
+// for all interaction payload types, reference slack docs: https://api.slack.com/interactivity/handling
+async function handleInteractions(payload, callback) {
+  if (payload.type === "block_actions") {
+    // messages with buttons are of type "block_actions"
+    handleButtonInteraction(payload, callback);
+  }
 }
 
 exports.handler = (data, context, callback) => {
