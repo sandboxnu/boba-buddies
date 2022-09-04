@@ -2,10 +2,11 @@ import { App } from "@slack/bolt";
 
 //TODO: change this to actual channel id when deploying
 const TESTING_CHANNEL_ID = "C02J6R0SUSX";
+const ACTUAL_CHANNEL_ID = "C040PKXP5GD";
 export const BOT_USER_ID = "U02J904RH1S";
 
 export const generatePairs = async (app: App) => {
-    const membersResponse = await app.client.conversations.members({channel: TESTING_CHANNEL_ID})
+    const membersResponse = await app.client.conversations.members({channel: ACTUAL_CHANNEL_ID})
     const memberIDs = shuffle(membersResponse.members?.filter((userID: string) => userID !== BOT_USER_ID) as string[])
     const pairs: string[][] = [];
 
