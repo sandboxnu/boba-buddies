@@ -1,6 +1,8 @@
 import { App } from "@slack/bolt";
 import { ChatPostMessageResponse } from "@slack/web-api";
-import pairings from "./data/pairings.json";
+import { PairsDataManager } from "../database/pairsDataManager";
+
+const pairsManager = new PairsDataManager();
 
 const CheckIn = (convoId: string) => ({
   channel: convoId,
@@ -39,6 +41,7 @@ const CheckIn = (convoId: string) => ({
 });
 
 export async function sendCheckInDM(app: App) {
+  const pairings: Map<string, string[]> = await pairsManager.getCurrentPairs();
   for (const convoID of Object.keys(pairings)) {
     // post messages to convo id
     const checkInMessageResponse: ChatPostMessageResponse =

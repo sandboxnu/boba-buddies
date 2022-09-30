@@ -1,27 +1,30 @@
 import { App } from "@slack/bolt";
+import { UsersDataManager } from "../database/usersDataManager";
 
 //TODO: change this to actual channel id when deploying
 const TESTING_CHANNEL_ID = "C02J6R0SUSX";
 export const BOT_USER_ID = "U02J904RH1S";
+const userManager = new UsersDataManager();
 
 export const generatePairs = async (app: App) => {
     const membersResponse = await app.client.conversations.members({channel: TESTING_CHANNEL_ID})
-    const memberIDs = shuffle(membersResponse.members?.filter((userID: string) => userID !== BOT_USER_ID) as string[])
+    const memberIDs: string[] = shuffle(membersResponse.members?.filter((userID: string) => userID !== BOT_USER_ID) as string[])
+    const usersFromDb: string[] = await userManager.syncUsersTable(memberIDs);
     const pairs: string[][] = [];
 
     // we shouldn't start any multiuser channels with just a singular person lol
-    if (memberIDs.length == 1) {
+    if (usersFromDb.length == 1) {
         return pairs;
     }
 
     //copy pasta internet go brrr
-    for (let i = 0; i < memberIDs.length; i += 2) {
-        const chunk = memberIDs.slice(i, i + 2);
+    for (let i = 0; i < usersFromDb.length; i += 2) {
+        const chunk = usersFromDb.slice(i, i + 2);
         pairs.push(chunk);
     }
 
     // if someone is lonely, then group that person with an existing pair
-    if (pairs.length > 1 && pairs.length * 2 !== memberIDs.length) {
+    if (pairs.length > 1 && pairs.length * 2 !== usersFromDb.length) {
         const lonelyMember: string[] = pairs.pop() ?? [];
         const lastPair: string[] = pairs.pop() ?? [];
         const newPair = lastPair.concat(lonelyMember);
