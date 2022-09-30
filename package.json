@@ -8,8 +8,7 @@
     "build": "tsc",
     "start": "ts-node pairAndIntroduce.ts",
     "pair": "ts-node ./scripts/pairAndConverseScript.ts",
-    "checkin": "ts-node ./scripts/checkInScript.ts",
-    "boom": "ts-node ./scripts/yeetus.ts"
+    "checkin": "ts-node ./scripts/checkInScript.ts"
   },
   "repository": {
     "type": "git",
