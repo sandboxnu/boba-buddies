@@ -42,7 +42,7 @@ const CheckIn = (convoId: string) => ({
 
 export async function sendCheckInDM(app: App) {
   const pairings: Map<string, string[]> = await pairsManager.getCurrentPairs();
-  for (const convoID of Object.keys(pairings)) {
+  for (const convoID of pairings.keys()) {
     // post messages to convo id
     const checkInMessageResponse: ChatPostMessageResponse =
       await app.client.chat.postMessage(CheckIn(convoID));

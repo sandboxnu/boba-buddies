@@ -19,6 +19,7 @@ const ICEBREAKER_10 = "What hobbies do you have (outside of Sandbox)?"
 const ICEBREAKERS = [ICEBREAKER_1, ICEBREAKER_2, ICEBREAKER_3, ICEBREAKER_4, ICEBREAKER_5, ICEBREAKER_6, ICEBREAKER_7, ICEBREAKER_8, ICEBREAKER_9, ICEBREAKER_10]
 
 export const startConversations = async (app: App, pairs: string[][]) => {
+    await pairsManager.deleteAllPairs();
     // iterate through all pairs to open a DM and send an intro message
     for (const pair of pairs) {
       // generate users string

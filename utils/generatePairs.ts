@@ -8,8 +8,8 @@ const userManager = new UsersDataManager();
 
 export const generatePairs = async (app: App) => {
     const membersResponse = await app.client.conversations.members({channel: TESTING_CHANNEL_ID})
-    const memberIDs: string[] = shuffle(membersResponse.members?.filter((userID: string) => userID !== BOT_USER_ID) as string[])
-    const usersFromDb: string[] = await userManager.syncUsersTable(memberIDs);
+    const memberIDs: string[] = membersResponse.members?.filter((userID: string) => userID !== BOT_USER_ID) as string[]
+    const usersFromDb: string[] = shuffle(await userManager.syncUsersTable(memberIDs));
     const pairs: string[][] = [];
 
     // we shouldn't start any multiuser channels with just a singular person lol
