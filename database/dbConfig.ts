@@ -8,4 +8,3 @@ AWS.config.update({
 });
 
 export const DB_CLIENT = new AWS.DynamoDB.DocumentClient();
-const POOL_TABLE: string = "boba-buddies-pool";
