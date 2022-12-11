@@ -6,6 +6,7 @@ const TESTING_CHANNEL_ID = "C02J6R0SUSX";
 export const BOT_USER_ID = "U02J904RH1S";
 const userManager = new UsersDataManager();
 
+// TODO: refactor this to use the pool manager now. ahaha this is cancer
 export const generatePairs = async (app: App) => {
     const membersResponse = await app.client.conversations.members({channel: TESTING_CHANNEL_ID})
     const memberIDs: string[] = membersResponse.members?.filter((userID: string) => userID !== BOT_USER_ID) as string[]
