@@ -10,15 +10,24 @@ export class PoolDataManager {
 		return await DB_CLIENT.scan(params).promise();
 	}
 
-	async getPoolForUser(primary: string): Promise<Map<string, string>[]>  {
-		const getParams = {
+	async getPoolForUser(user: string): Promise<Map<string, string>[]>  {
+		const getPrimaryParams = {
 			TableName: POOL_TABLE,
 			FilterExpression: "primary = :primary",
 			ExpressionAttributeValues: {
-				":primary": {S: primary}
+				":primary": {S: user}
 			}
 		}
-		return await DB_CLIENT.scan(getParams).promise();
+		const getSecondaryParams = {
+			TableName: POOL_TABLE,
+			FilterExpression: "secondary = :secondary",
+			ExpressionAttributeValues: {
+				":secondary": {S: user}
+			}
+		}
+		const primaryPool = await DB_CLIENT.scan(getPrimaryParams).promise();
+		const secondaryPool = await DB_CLIENT.scan(getSecondaryParams).promise();
+		return [...primaryPool, ...secondaryPool];
 	}
 
 	async addPair(slackUser1: string, slackUser2: string): Promise<void> {
@@ -33,58 +42,59 @@ export class PoolDataManager {
 		return await DB_CLIENT.put(params).promise();
 	}
 
-	async popPair(primary: string): Promise<Map<string, string>> {
-		const getParams = {
-			TableName: POOL_TABLE,
-			FilterExpression: "primary = :primary",
-			ExpressionAttributeValues: {
-				":primary": {S: primary}
+	async deletePair(pair: Map<string, string>): Promise<void> {
+		for(const [slackUser1, slackUser2] of pair) {
+			const delParams = {
+				TableName: POOL_TABLE,
+				Key: {
+					primary: slackUser1,
+					secondary: slackUser2
+				}
 			}
-		}
-		const result = await DB_CLIENT.scan(getParams).promise();
-		//TODO: fix this shit
-		const randomPair = result.Items;
-
-		// TODO: i think i need to fix this
-		const delParams = {
-			TableName: POOL_TABLE,
-			Key: {
-				primary: primary,
-				secondary: randomPair.secondary
-			}
+			await DB_CLIENT.delete(delParams).promise()
 		}
 
-		await DB_CLIENT.delete(delParams).promise();
+		return;
+	}
+
+	async popPair(user: string): Promise<Map<string, string>> {
+		const userPool = await this.getPoolForUser(user);
+		const randomPair = userPool[Math.floor(Math.random() * userPool.length)];
+		await this.deletePair(randomPair);
 
 		return randomPair;
 	}
 
-	async syncPool(slackUsers: string[], toAdd: string[], toDelete: string[]): Promise<void> {
+	async syncPool(oldSlackUsers: string[], newSlackUsers: string[]): Promise<void> {
 		const currPool: Map<string, string>[] = await this.getPool();
 		if (currPool.length === 0) {
-			this.permuteAndAddPairs(slackUsers);
+			await this.permuteAndAddPairs(newSlackUsers);
 		}
 
+		const toAdd = newSlackUsers.filter(user => !oldSlackUsers.includes(user));
+		const toDelete: string[] = oldSlackUsers.filter(user => !newSlackUsers.includes(user));
+
 		if (toAdd.length > 0) {
-			// TODO: need to add
+			const currentExistingMembers: string[] = newSlackUsers.filter(user => !toAdd.includes(user));
+			for (const toAddSlackUser of toAdd) {
+				for (const currentMember of currentExistingMembers) {
+					await this.addPair(toAddSlackUser, currentMember);
+				}
+			}
+
+			await this.permuteAndAddPairs(toAdd);
 		}
 
 		if (toDelete.length > 0) {
 			for(const toDeleteUser of toDelete) {
 				const pairsToDelete: Map<string, string>[] = await this.getPoolForUser(toDeleteUser);
-				for(const [primary, secondary] of pairsToDelete) {
-					const delParams = {
-						TableName: POOL_TABLE,
-						Key: {
-							primary: primary,
-							secondary: secondary
-						}
-					}
-
-				await DB_CLIENT.delete(delParams).promise();
+				for (const pairToDelete of pairsToDelete) {
+					await this.deletePair(pairToDelete);
 				}
 			}
 		}
+
+		return;
 	}
 
 	private async permuteAndAddPairs(slackUsers: string[]): Promise<void> {
