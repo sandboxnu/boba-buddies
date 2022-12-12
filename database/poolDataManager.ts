@@ -7,35 +7,30 @@ export class PoolDataManager {
 		const params = {
 			TableName: POOL_TABLE
 		};
-		return await DB_CLIENT.scan(params).promise();
+
+		const result = await DB_CLIENT.scan(params).promise();
+		return result.Items;
 	}
 
 	async getPoolForUser(user: string): Promise<Map<string, string>[]>  {
-		const getPrimaryParams = {
+		const getFilteredParams = {
 			TableName: POOL_TABLE,
-			FilterExpression: "primary = :primary",
+			FilterExpression: "(primaryBuddy = :primary) OR (secondaryBuddy = :secondary)",
 			ExpressionAttributeValues: {
-				":primary": {S: user}
+				":primary": user,
+				":secondary": user
 			}
 		}
-		const getSecondaryParams = {
-			TableName: POOL_TABLE,
-			FilterExpression: "secondary = :secondary",
-			ExpressionAttributeValues: {
-				":secondary": {S: user}
-			}
-		}
-		const primaryPool = await DB_CLIENT.scan(getPrimaryParams).promise();
-		const secondaryPool = await DB_CLIENT.scan(getSecondaryParams).promise();
-		return [...primaryPool, ...secondaryPool];
+		const result = await DB_CLIENT.scan(getFilteredParams).promise();
+		return result.Items;
 	}
 
 	async addPair(slackUser1: string, slackUser2: string): Promise<void> {
 		const params = {
 			TableName: POOL_TABLE,
 			Item: {
-				"primary": slackUser1,
-				"secondary": slackUser2
+				"primaryBuddy": slackUser1,
+				"secondaryBuddy": slackUser2
 			}
 		}
 
@@ -43,24 +38,20 @@ export class PoolDataManager {
 	}
 
 	async deletePair(pair: Map<string, string>): Promise<void> {
-		for(const [slackUser1, slackUser2] of pair) {
-			const delParams = {
+		const delParams = {
 				TableName: POOL_TABLE,
 				Key: {
-					primary: slackUser1,
-					secondary: slackUser2
+					primaryBuddy: pair.get("primaryBuddy"),
+					secondaryBuddy: pair.get("secondaryBuddy")
 				}
 			}
-			await DB_CLIENT.delete(delParams).promise()
-		}
-
-		return;
+		return await DB_CLIENT.delete(delParams).promise();
 	}
 
 	async popPair(user: string): Promise<Map<string, string>> {
 		const userPool = await this.getPoolForUser(user);
 		const randomPair = userPool[Math.floor(Math.random() * userPool.length)];
-		await this.deletePair(randomPair);
+		await this.deletePair(new Map(Object.entries(randomPair)));
 
 		return randomPair;
 	}
@@ -89,7 +80,7 @@ export class PoolDataManager {
 			for(const toDeleteUser of toDelete) {
 				const pairsToDelete: Map<string, string>[] = await this.getPoolForUser(toDeleteUser);
 				for (const pairToDelete of pairsToDelete) {
-					await this.deletePair(pairToDelete);
+					await this.deletePair(new Map(Object.entries(pairToDelete)));
 				}
 			}
 		}
