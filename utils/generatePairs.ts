@@ -1,20 +1,19 @@
 import { App } from "@slack/bolt";
 import { UsersDataManager } from "../database/usersDataManager";
+import { PoolDataManager } from "../database/poolDataManager";
 
 //TODO: change this to actual channel id when deploying
 const TESTING_CHANNEL_ID = "C02J6R0SUSX";
 export const BOT_USER_ID = "U02J904RH1S";
 const userManager = new UsersDataManager();
+const poolManager = new PoolDataManager();
 
-// TODO: refactor this to use the pool manager now. ahaha this is cancer
-// 1. fetch current and new list of slack users
-// 2. sync the users table
-// 3. sync the pool table
-// 4. extract pairs for each user
 export const generatePairs = async (app: App) => {
     const membersResponse = await app.client.conversations.members({channel: TESTING_CHANNEL_ID})
     const memberIDs: string[] = membersResponse.members?.filter((userID: string) => userID !== BOT_USER_ID) as string[]
+    const oldUserList: string[] = await userManager.getUsers();
     const usersFromDb: string[] = shuffle(await userManager.syncUsersTable(memberIDs));
+    await poolManager.syncPool(oldUserList, usersFromDb);
     const pairs: string[][] = [];
 
     // we shouldn't start any multiuser channels with just a singular person lol
@@ -22,18 +21,31 @@ export const generatePairs = async (app: App) => {
         return pairs;
     }
 
-    //copy pasta internet go brrr
-    for (let i = 0; i < usersFromDb.length; i += 2) {
-        const chunk = usersFromDb.slice(i, i + 2);
-        pairs.push(chunk);
-    }
+    // retrieve pairings from the pool for every user in usersToBePaired list
+    const usersToBePaired: string[] = [...usersFromDb];
+    while (usersToBePaired.length > 0) {
+      // pop the user and get the user's pairing for this cycle
+      const primaryUser = usersToBePaired.pop() ?? "";
+      const pairMapObject = await poolManager.popPair(primaryUser);
 
-    // if someone is lonely, then group that person with an existing pair
-    if (pairs.length > 1 && pairs.length * 2 !== usersFromDb.length) {
-        const lonelyMember: string[] = pairs.pop() ?? [];
+      // get the buddy from pairing to remove from usersToBePaired list
+      const secondaryUser = (new Map(Object.entries(pairMapObject))).get("secondaryBuddy");
+      const indexToRemove = usersToBePaired.indexOf(secondaryUser);
+      if (indexToRemove > -1) {
+        usersToBePaired.splice(indexToRemove, 1);
+      }
+
+      // add pairing for user and buddy into returned list
+      pairs.push(Object.values(pairMapObject));
+
+      // if someone is lonely, then group that person with an existing pair
+      if (usersToBePaired.length === 1) {
+        const lonelyMember: string = usersToBePaired.pop() ?? "";
         const lastPair: string[] = pairs.pop() ?? [];
-        const newPair = lastPair.concat(lonelyMember);
+        const newPair = lastPair.concat([lonelyMember]);
+
         pairs.push(newPair);
+      }
     }
 
     return pairs;
