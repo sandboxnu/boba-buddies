@@ -5,6 +5,7 @@ import { startConversations } from '../utils/startConversations';
 const yeet = async () => {
 	let pairList = await generatePairs(appConfig);
 	await startConversations(appConfig, pairList);
+	console.log(pairList);
 }
 
 yeet();

@@ -22,7 +22,7 @@ export const generatePairs = async (app: App) => {
     }
 
     // retrieve pairings from the pool for every user in usersToBePaired list
-    const usersToBePaired: string[] = [...usersFromDb];
+    let usersToBePaired: string[] = [...usersFromDb];
     while (usersToBePaired.length > 0) {
       // pop the user and get the user's pairing for this cycle
       const primaryUser = usersToBePaired.pop() ?? "";
@@ -30,10 +30,7 @@ export const generatePairs = async (app: App) => {
 
       // get the buddy from pairing to remove from usersToBePaired list
       const secondaryUser = (new Map(Object.entries(pairMapObject))).get("secondaryBuddy");
-      const indexToRemove = usersToBePaired.indexOf(secondaryUser);
-      if (indexToRemove > -1) {
-        usersToBePaired.splice(indexToRemove, 1);
-      }
+      usersToBePaired = usersToBePaired.filter(user => user !== secondaryUser);
 
       // add pairing for user and buddy into returned list
       pairs.push(Object.values(pairMapObject));
