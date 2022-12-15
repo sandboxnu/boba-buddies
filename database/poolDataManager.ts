@@ -48,9 +48,10 @@ export class PoolDataManager {
 		return await DB_CLIENT.delete(delParams).promise();
 	}
 
-	async popPair(user: string): Promise<Map<string, string>> {
+	async popPair(user: string, alreadyPairedList: string[]): Promise<Map<string, string>> {
 		const userPool = await this.getPoolForUser(user);
-		const randomPair = userPool[Math.floor(Math.random() * userPool.length)];
+		const unusedUserPool = userPool.filter(unusedPair => !this.containsAny(alreadyPairedList, unusedPair));
+		const randomPair = unusedUserPool[Math.floor(Math.random() * unusedUserPool.length)];
 		await this.deletePair(new Map(Object.entries(randomPair)));
 
 		return randomPair;
@@ -59,6 +60,7 @@ export class PoolDataManager {
 	async syncPool(oldSlackUsers: string[], newSlackUsers: string[]): Promise<void> {
 		const currPool: Map<string, string>[] = await this.getPool();
 		if (currPool.length === 0) {
+			console.log("LOG INFO: the current pool is empty, so now we will populate the pool with all pairings");
 			await this.permuteAndAddPairs(newSlackUsers);
 		}
 
@@ -94,5 +96,10 @@ export class PoolDataManager {
 				await this.addPair(slackUsers[i], slackUsers[j]);
 			}
 		}
+	}
+	
+	private containsAny(listToCheck: string[], pair: Object): boolean {
+		const values = Object.values(pair);
+		return values.some(value => listToCheck.includes(value));
 	}
 }

@@ -23,14 +23,17 @@ export const generatePairs = async (app: App) => {
 
     // retrieve pairings from the pool for every user in usersToBePaired list
     let usersToBePaired: string[] = [...usersFromDb];
+    let usersAlreadyPaired: string[] = [];
     while (usersToBePaired.length > 0) {
       // pop the user and get the user's pairing for this cycle
       const primaryUser = usersToBePaired.pop() ?? "";
-      const pairMapObject = await poolManager.popPair(primaryUser);
+      const pairMapObject = await poolManager.popPair(primaryUser, usersAlreadyPaired);
 
       // get the buddy from pairing to remove from usersToBePaired list
-      const secondaryUser = (new Map(Object.entries(pairMapObject))).get("secondaryBuddy");
+      const secondaryUser = getBuddy(primaryUser, new Map(Object.entries(pairMapObject)));
       usersToBePaired = usersToBePaired.filter(user => user !== secondaryUser);
+      usersAlreadyPaired.push(primaryUser);
+      usersAlreadyPaired.push(secondaryUser);
 
       // add pairing for user and buddy into returned list
       pairs.push(Object.values(pairMapObject));
@@ -46,6 +49,17 @@ export const generatePairs = async (app: App) => {
     }
 
     return pairs;
+}
+
+function getBuddy(user: string, pair: Map<string, string>): string {
+  const primaryBuddy = pair.get("primaryBuddy") ?? "";
+  const secondaryBuddy = pair.get("secondaryBuddy") ?? "";
+
+  if (primaryBuddy === user) {
+    return secondaryBuddy;
+  } else {
+    return primaryBuddy;
+  }
 }
 
 // stackoverflow said fisher-yates good shuffle algorithm, so i copy pasta away

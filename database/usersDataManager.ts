@@ -46,6 +46,7 @@ export class UsersDataManager {
 	async syncUsersTable(usersFromSlack: string[]): Promise<string[]> {
 		const usersFromDb: string[] = await this.getUsers();
 		if (usersFromDb.length === 0) {
+			console.log("LOG INFO: there are no users in the DB, so now we populate with the slack users: ", usersFromSlack);
 			for(const user of usersFromSlack) {
 				await this.addUser(user);
 			}
