@@ -11,7 +11,7 @@ export class StatusDataManager {
 
 		const result = await DB_CLIENT.scan(getParam).promise();
 
-		return result.Items.map((item: any) => item.weeklyStatus).every(Boolean);
+		return result.Items.map((item: any) => item.shouldPair).every(Boolean);
 	}
 
 	async putStatus(oldStatus: boolean): Promise<void> {
@@ -23,6 +23,6 @@ export class StatusDataManager {
 			}
 		}
 
-		return await DB_CLIENT.putItem(putParam).promise();
+		return await DB_CLIENT.put(putParam).promise();
 	}
 }
