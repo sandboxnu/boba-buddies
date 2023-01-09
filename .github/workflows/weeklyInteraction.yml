@@ -1,8 +1,7 @@
 name: "Weekly Interaction"
 on: 
   schedule:
-    - cron: "0 15 * 1-4 0"
-    - cron: "0 15 * 9-12 0"
+    - cron: "0 15 * 1-4,9-12 0"
 
 jobs:
   interact:
