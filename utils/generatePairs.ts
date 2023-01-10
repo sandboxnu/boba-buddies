@@ -2,14 +2,13 @@ import { App } from "@slack/bolt";
 import { UsersDataManager } from "../database/usersDataManager";
 import { PoolDataManager } from "../database/poolDataManager";
 
-//TODO: change this to actual channel id when deploying
-const TESTING_CHANNEL_ID = "C02J6R0SUSX";
+const CHANNEL_ID = "C04GHB54U30";
 export const BOT_USER_ID = "U02J904RH1S";
 const userManager = new UsersDataManager();
 const poolManager = new PoolDataManager();
 
 export const generatePairs = async (app: App) => {
-    const membersResponse = await app.client.conversations.members({channel: TESTING_CHANNEL_ID})
+    const membersResponse = await app.client.conversations.members({channel: CHANNEL_ID})
     const memberIDs: string[] = membersResponse.members?.filter((userID: string) => userID !== BOT_USER_ID) as string[]
     const oldUserList: string[] = await userManager.getUsers();
     const usersFromDb: string[] = shuffle(await userManager.syncUsersTable(memberIDs));
