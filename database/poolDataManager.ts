@@ -51,6 +51,10 @@ export class PoolDataManager {
 	async popPair(user: string, alreadyPairedList: string[]): Promise<Map<string, string>> {
 		const userPool = await this.getPoolForUser(user);
 		const unusedUserPool = userPool.filter(unusedPair => !this.containsAny(alreadyPairedList, unusedPair));
+
+		console.log(`DEBUG: popping for this user ${user} with an alreadyPairedList of ${alreadyPairedList}`);
+		console.log(`DEBUG: retrieved an unusedUserPool for pairing ${unusedUserPool}`);
+
 		const randomPair = unusedUserPool[Math.floor(Math.random() * unusedUserPool.length)];
 		await this.deletePair(new Map(Object.entries(randomPair)));
 
