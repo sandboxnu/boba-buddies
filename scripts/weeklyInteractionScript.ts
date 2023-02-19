@@ -7,7 +7,7 @@ import { StatusDataManager } from '../database/statusDataManager';
 const interactWithBuddies = async () => {
 	const statusManager = new StatusDataManager();
 	
-	const shouldPair = await statusManager.getStatus();;
+	const shouldPair = await statusManager.getStatus();
 	console.log(shouldPair 
 		? "LOG INFO: PAIRING will happen for this week" 
 		: "LOG INFO: CHECKING IN will happen for this week");
