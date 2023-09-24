@@ -14,7 +14,7 @@ const interactWithBuddies = async () => {
 
 	if (shouldPair) {
 		let pairList = await generatePairs(appConfig);
-		console.log("LOG INFO: pairings for this run is done: ", pairList);
+		console.log("LOG INFO: pairings for this run are complete: ", pairList);
 
 		await startConversations(appConfig, pairList);
 		console.log("LOG INFO: started conversations with the pairings");
@@ -24,6 +24,9 @@ const interactWithBuddies = async () => {
 	}
 
 	await statusManager.putStatus(shouldPair);
+	console.log(shouldPair 
+		? "LOG INFO: Updated status to CHECKING IN for next week" 
+		: "LOG INFO: Updated status to PAIRING for next week");
 }
 
 interactWithBuddies();

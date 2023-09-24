@@ -35,12 +35,12 @@ export class UsersDataManager {
 	}
 
 	async deleteAllUsers(): Promise<void> {
-	const users: string[] = await this.getUsers();
-	for(const id of users) {
-		await this.delete(id);
-	}
+		const users: string[] = await this.getUsers();
+		for (const id of users) {
+			await this.delete(id);
+		}
 
-	return;
+		return;
 	}
 
 	async syncUsersTable(usersFromSlack: string[]): Promise<string[]> {
